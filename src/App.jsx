@@ -3,6 +3,7 @@ import Homepage from "./Pages/Homepage"
 import Signup from "./Pages/Signup"
 import Login from "./Pages/Login"
 import Navbar from "./Components/Navbar"
+import { Toaster } from "react-hot-toast"
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -24,6 +25,7 @@ function App() {
           <Route path="/login" element={<Login />}></Route>
         </Routes>
       </div>
+      <Toaster/>
     </div>
   )
 }
