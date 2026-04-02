@@ -6,7 +6,7 @@ import { useUserStore } from '../stores/useUserStore'
 
 
 const Signup = () => {
-  const loading = false
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -14,12 +14,18 @@ const Signup = () => {
     password: "",
     confirmPassword: ""
   })
-  const {signup} = useUserStore()
+  const {signup, loading} = useUserStore()
   const handleSubmit = (e) => {
     e.preventDefault()
-    //console.log(formData);
-    
+    //console.log(formData); 
     signup(formData)
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    })
 
   }
   return (
