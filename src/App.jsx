@@ -3,6 +3,7 @@ import Homepage from "./Pages/Homepage"
 import Signup from "./Pages/Signup"
 import Login from "./Pages/Login"
 import Navbar from "./Components/Navbar"
+import AdminPage from "./Pages/AdminPage"
 import { Toaster } from "react-hot-toast"
 import { useUserStore } from "./stores/useUserStore"
 import { useEffect } from "react"
@@ -33,6 +34,7 @@ function App() {
           <Route path="/" element={<Homepage />}></Route>
           <Route path="/signup" element={user ? <Navigate to={'/'} /> : <Signup />}></Route>
           <Route path="/login" element={user ? <Navigate to={'/'} /> : <Login />}></Route>
+          <Route path="/secret-dashboard" element={user && user.role === 'ADMIN' ? <AdminPage/>  : <Navigate to={'/login'} />}></Route>
         </Routes>
       </div>
       <Toaster />

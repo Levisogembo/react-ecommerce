@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
 
 const Navbar = () => {
-    const isAdmin = true
+    //const isAdmin = true
     const {user, logout} = useUserStore()
     //console.log(user);
     
@@ -27,10 +27,10 @@ const Navbar = () => {
                                 </span>
                             </Link>)
                         }
-                        {isAdmin && (
+                        {user && user.role === 'ADMIN' && (
                             <Link className='bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md font-medium
-								 transition duration-300 ease-in-out flex items-center'>
-                                <Lock className='inline-block mr-1' size={18}></Lock>
+								 transition duration-300 ease-in-out flex items-center' to={"/secret-dashboard"}>
+                                <Lock className='inline-block mr-1' size={18} ></Lock>
                                 <span className='hidden sm:inline'>Dashboard</span>
                             </Link>
                         )}
