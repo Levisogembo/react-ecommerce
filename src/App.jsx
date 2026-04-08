@@ -11,11 +11,12 @@ import LoadingSpinner from "./Components/loadingSpinner"
 
 function App() {
   // const [count, setCount] = useState(0)
-  const { user, checkingAuth, checkAuth } = useUserStore()
+  const { user, checkingAuth, checkAuth, googleRedirect } = useUserStore()
 
   useEffect(() => {
+    googleRedirect()
     checkAuth()
-  }, [checkAuth])
+  }, [])
   
   if (checkingAuth) return <LoadingSpinner />
 

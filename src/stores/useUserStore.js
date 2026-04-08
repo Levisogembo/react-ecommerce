@@ -110,9 +110,7 @@ export const useUserStore = create((set, get) => ({
         }
     },
 
-    logout: async (token) => {
-        console.log(token);
-
+    logout: async () => {
         const mutation = `
             mutation Logout {
                 logout {
@@ -134,6 +132,23 @@ export const useUserStore = create((set, get) => ({
             toast.error(message)
         }
 
+    },
+
+    googleRedirect: async () => {
+        const params = new URLSearchParams(window.location.search)
+        const token = params.get('token')
+
+        if(!token) return
+
+        localStorage.setItem('token',token)
+
+        const decoded = JSON.parse(atob(token.split('.')[1]))
+        set({user:decoded,token})
+
+        //remove the token from the url
+        window.history.replaceState({}, '', '/')
+
+        toast.success('Logged in with google successfully')
     }
 
 }))

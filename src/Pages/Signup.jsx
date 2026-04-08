@@ -14,7 +14,7 @@ const Signup = () => {
     password: "",
     confirmPassword: ""
   })
-  const {signup, loading} = useUserStore()
+  const { signup, loading } = useUserStore()
   const handleSubmit = (e) => {
     e.preventDefault()
     //console.log(formData); 
@@ -168,6 +168,31 @@ const Signup = () => {
               )}
             </button>
           </form>
+
+          <div className='relative my-6'>
+            <div className='absolute inset-0 flex items-center'>
+              <div className='w-full border-t border-gray-600' />
+            </div>
+            <div className='relative flex justify-center text-sm'>
+              <span className='px-2 bg-gray-800 text-gray-400'>Or Signup with</span>
+            </div>
+          </div>
+
+          <button
+            type='button'
+            onClick={() => window.location.href = import.meta.env.VITE_GOOGLE_AUTH_URL}
+            className='w-full flex justify-center items-center gap-3 py-2 px-4 border border-gray-600 
+    rounded-md shadow-sm text-sm font-medium text-white bg-gray-700 hover:bg-gray-600 
+    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 
+    transition duration-150 ease-in-out'
+          >
+            <img
+              src='https://www.google.com/favicon.ico'
+              alt='Google'
+              className='h-5 w-5'
+            />
+            Continue with Google
+          </button>
 
           <p className='mt-8 text-center text-sm text-gray-400'>
             Already have an account?{" "}
