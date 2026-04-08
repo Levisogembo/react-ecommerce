@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import CreateProductForm from '../Components/CreateProductForm'
 import ProductList from '../Components/ProductList'
 import AnalyticsTab from '../Components/AnalyticsTab'
+
 const tabs = [
     { id: "create", label: "Create Product", icon: PlusCircle },
     { id: "products", label: "Products", icon: ShoppingBasket },
