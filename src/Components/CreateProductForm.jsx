@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import { useInventoryStore } from '../stores/useInventoryStore';
+import toast from 'react-hot-toast';
 
 //const categories = ["jeans", "t-shirts", "shoes", "glasses", "jackets", "suits", "bags"];
 
@@ -18,13 +19,28 @@ const CreateProductForm = () => {
     file: null,
   })
 
-  const { loading, categories, fetchCategories } = useInventoryStore()
+  const { loading, categories, fetchCategories, createProduct } = useInventoryStore()
   useEffect(() => {
     fetchCategories()
   }, [])
-  console.log(categories);
-  const handleSubmit = (e) => {
+ 
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    if(!newProduct.file){
+      toast.error('Please upload an image for the product')
+      return
+    }
+    await createProduct(newProduct)
+    setNewProduct({
+      name: "",
+      description: "",
+      brand: "",
+      price: "",
+      quantity: "",
+      category: "",
+      file: null,
+    })
+
   }
   return (
     <motion.div
@@ -34,7 +50,7 @@ const CreateProductForm = () => {
       transition={{ duration: 0.8 }}
     >
       <h2 className='text-2xl font-semibold mb-6 text-emerald-300'>Create New Product</h2>
-      <form onSubmit={handleSubmit} >
+      <form onSubmit={handleSubmit} className='space-y-4' >
         <div>
           <label htmlFor='name' className='block text-sm font-medium text-gray-300'>
             Product Name
@@ -106,7 +122,7 @@ const CreateProductForm = () => {
 
         <div>
           <label htmlFor='quantity' className='block text-sm font-medium text-gray-300'>
-            Price
+            Quantity
           </label>
           <input
             type='number'
@@ -156,6 +172,26 @@ const CreateProductForm = () => {
           </label>
           {newProduct.file && <span className='ml-3 text-sm text-gray-400'>{newProduct.file.name}</span>}
         </div>
+
+        <button
+          type='submit'
+          className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md 
+					shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
+					focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50'
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader className='mr-2 h-5 w-5 animate-spin' aria-hidden='true' />
+              Loading...
+            </>
+          ) : (
+            <>
+              <PlusCircle className='mr-2 h-5 w-5' />
+              Create Product
+            </>
+          )}
+        </button>
       </form>
     </motion.div>
   )

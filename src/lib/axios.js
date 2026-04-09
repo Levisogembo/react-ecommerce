@@ -1,18 +1,26 @@
 import axios from "axios";
 
-const axiosInstance = axios.create({
-    baseURL: import.meta.mode === "development" ? "http://localhost:3000/graphql" : "/graphql",
-    withCredentials: true, //send cookies to server
+
+// graphql instance
+export const graphqlInstance = axios.create({
+    baseURL: import.meta.env.VITE_GRAPHQL_URL,
+    withCredentials: true,
 })
 
-axiosInstance.interceptors.request.use((config)=>{
-    const token = localStorage.getItem('token')
+// rest instance 
+export const restInstance = axios.create({
+    baseURL: import.meta.env.VITE_REST_URL,
+    withCredentials: true,
+})
 
-    if(token){
+// attach token interceptor to both
+const attachToken = (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
         config.headers.Authorization = `Bearer ${token}`
     }
-
     return config
-})
+}
 
-export default axiosInstance
+graphqlInstance.interceptors.request.use(attachToken)
+restInstance.interceptors.request.use(attachToken)

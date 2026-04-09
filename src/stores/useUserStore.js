@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from '../lib/axios'
+import {graphqlInstance } from '../lib/axios'
 import { toast } from 'react-hot-toast'
 
 export const useUserStore = create((set, get) => ({
@@ -32,7 +32,7 @@ export const useUserStore = create((set, get) => ({
             userInput: { firstName, lastName, email, password, confirmPassword }
         }
         try {
-            const res = await axios.post('', { query: mutation, variables })
+            const res = await graphqlInstance.post('', { query: mutation, variables })
             // GraphQL errors come back as 200 — manually throw them
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
@@ -65,7 +65,7 @@ export const useUserStore = create((set, get) => ({
         }
         try {
 
-            const res = await axios.post('', { query: mutation, variables })
+            const res = await graphqlInstance.post('', { query: mutation, variables })
             // GraphQL errors come back as 200 — manually throw them
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
@@ -120,7 +120,7 @@ export const useUserStore = create((set, get) => ({
             }
         `
         try {
-            const res = await axios.post('', { query: mutation })
+            const res = await graphqlInstance.post('', { query: mutation })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
             }
