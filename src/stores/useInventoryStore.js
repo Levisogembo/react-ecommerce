@@ -6,6 +6,10 @@ import { restInstance, graphqlInstance } from "../lib/axios";
 export const useInventoryStore = create((set, get) => ({
     categories: [],
     loading: false,
+    products: [],
+    page:1,
+    limit: 10,
+    total:0,
 
     fetchCategories: async () => {
         set({ loading: true })
@@ -50,6 +54,10 @@ export const useInventoryStore = create((set, get) => ({
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
             }
+            set((previousState) => ({
+                products: [...previousState.products, res.data],
+            }))
+
             toast.success("Product created successfully")
             set({ loading: false })
         } catch (error) {
@@ -58,6 +66,95 @@ export const useInventoryStore = create((set, get) => ({
             toast.error(message)
         }
 
+    },
+
+    deleteProduct: async (productId) => {
+
+    },
+
+    toggleFeaturedProduct: async () => {
+
+    },
+
+    fetchAllProducts: async (page = 1, limit = 10) => {
+        set({ loading: true })
+
+        const query = `
+            query GetManyProduct($page: Float!, $limit: Float!) {
+            getManyProducts(page: $page, limit: $limit) {
+                products {
+                    productId
+                    name
+                    description
+                    brand
+                    price
+                    quantity
+                    isFeatured
+                    reservedQuantity
+                    category {
+                        categoryId
+                        name
+                    }
+                    images {
+                        imageId
+                        fileName
+                        filepath
+                    }
+                }
+                total
+            }
+        }
+    `
+        const variables = { page, limit }
+
+        try {
+            const res = await graphqlInstance.post('', { query, variables })
+
+            if (res.data.errors) {
+                throw new Error(res.data.errors[0].message)
+            }
+
+            const {products, total }  = res.data.data.getManyProducts
+
+            set({ products, loading: false })
+
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error fetching products"
+            toast.error(message)
+        }
+    },
+
+    createCategory: async ({name, description}) => {
+        set({loading: true})
+        const query = `
+            mutation CreateCategory($categoryInput: createCategoryInput!){
+                createCategory(categoryInput: $categoryInput){
+                    categoryId
+                    name
+                    description
+                }           
+            }
+        `
+        const variables = {
+            categoryInput: {name, description}
+        }
+        //console.log(variables);
+        
+        try {
+            const res = graphqlInstance.post('',{query,variables})
+            if (res.data.errors) {
+                throw new Error(res.data.errors[0].message)
+            }
+            console.log(res.data);
+            
+            set({loading: false})
+            toast.success('Category created successfully')
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error fetching categories"
+            toast.error(message)
+        }
     }
 })
 )

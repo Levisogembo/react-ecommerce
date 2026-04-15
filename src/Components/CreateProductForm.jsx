@@ -23,7 +23,8 @@ const CreateProductForm = () => {
   useEffect(() => {
     fetchCategories()
   }, [])
- 
+  console.log(categories);
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
     if(!newProduct.file){

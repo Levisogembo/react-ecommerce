@@ -6,13 +6,11 @@ import ProductList from '../Components/ProductList'
 import AnalyticsTab from '../Components/AnalyticsTab'
 import { useInventoryStore } from '../stores/useInventoryStore'
 import CategoriesTab from '../Components/CategoriesTab'
+import CreateCategoryForm from './createCategoryForm'
 
 const tabs = [
-    { id: "create", label: "Create Product", icon: PlusCircle },
-    { id: "products", label: "Products", icon: ShoppingBasket },
+    { id: "create", label: "Create Category", icon: PlusCircle },
     { id: "categories", label: "Categories", icon: Grid },
-    { id: "orders", label: "Orders", icon: ShoppingCart },
-    { id: "analytics", label: "Analytics", icon: BarChart }
 ]
 
 const AdminPage = () => {
@@ -26,10 +24,10 @@ const AdminPage = () => {
     return (
         <div className='min-h-screen relative overflow-hidden'>
             <div className='relative z-10 container mx-auto px-4 py-16'>
-                <motion.h1 className='text-4xl font-bold mb-8 text-emerald-400 text-center'
+                <motion.p className='text-4xl font-bold mb-8 text-emerald-400 text-center'
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}>Admin Dashboard</motion.h1>
+                    transition={{ duration: 0.8 }}>Categories</motion.p>
                 <div className='flex justify-center mb-8'>
                     {tabs.map((tab) => (
                         <button
@@ -45,7 +43,7 @@ const AdminPage = () => {
                         </button>
                     ))}
                 </div>
-                {activeTab === "create" && <CreateProductForm/>}
+                {activeTab === "create" && <CreateCategoryForm/>}
                 {activeTab === "products" && <ProductList/>}
                 {activeTab === "analytics" && <AnalyticsTab/>}
                 {activeTab === "categories" && <CategoriesTab/>}
