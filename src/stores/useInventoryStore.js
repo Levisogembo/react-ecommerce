@@ -7,9 +7,9 @@ export const useInventoryStore = create((set, get) => ({
     categories: [],
     loading: false,
     products: [],
-    page:1,
+    page: 1,
     limit: 10,
-    total:0,
+    total: 0,
 
     fetchCategories: async () => {
         set({ loading: true })
@@ -68,6 +68,40 @@ export const useInventoryStore = create((set, get) => ({
 
     },
 
+    updateProduct: async (productId, updatePayload) => {
+        console.log(updatePayload);
+        
+        set({ loading: true })
+        try {
+            const formData = new FormData()
+            Object.entries(updatePayload).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    if (value instanceof File) {
+                        formData.append(key, value);
+                    } else {
+                        formData.append(key, String(value));
+                    }
+                }
+            });
+            const res = await restInstance.patch(`/product/update/${productId}`, formData)
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+            //replace the existing product with the new updated product
+            set((previousState) => ({
+                products: previousState.products.map((product) =>
+                    product.productId === res.data.productId ? res.data : product
+                ),
+            }))
+            toast.success('Product updated successfully')
+            set({loading:false})
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error updating product"
+            toast.error(message)
+        }
+    },
+
     deleteProduct: async (productId) => {
 
     },
@@ -76,8 +110,8 @@ export const useInventoryStore = create((set, get) => ({
 
     },
 
-    fetchAllProducts: async (page = 1, limit = 10) => {
-        set({ loading: true })
+    fetchAllProducts: async (page, limit) => {
+        set({ loading: true, page })
 
         const query = `
             query GetManyProduct($page: Float!, $limit: Float!) {
@@ -114,9 +148,9 @@ export const useInventoryStore = create((set, get) => ({
                 throw new Error(res.data.errors[0].message)
             }
 
-            const {products, total }  = res.data.data.getManyProducts
+            const { products, total } = res.data.data.getManyProducts
 
-            set({ products, loading: false })
+            set({ products, total, loading: false })
 
         } catch (error) {
             set({ loading: false })
@@ -125,8 +159,8 @@ export const useInventoryStore = create((set, get) => ({
         }
     },
 
-    createCategory: async ({name, description}) => {
-        set({loading: true})
+    createCategory: async ({ name, description }) => {
+        set({ loading: true })
         const query = `
             mutation CreateCategory($categoryInput: createCategoryInput!){
                 createCategory(categoryInput: $categoryInput){
@@ -137,18 +171,18 @@ export const useInventoryStore = create((set, get) => ({
             }
         `
         const variables = {
-            categoryInput: {name, description}
+            categoryInput: { name, description }
         }
         //console.log(variables);
-        
+
         try {
-            const res = graphqlInstance.post('',{query,variables})
+            const res = graphqlInstance.post('', { query, variables })
             if (res.data.errors) {
                 throw new Error(res.data.errors[0].message)
             }
             console.log(res.data);
-            
-            set({loading: false})
+
+            set({ loading: false })
             toast.success('Category created successfully')
         } catch (error) {
             set({ loading: false })

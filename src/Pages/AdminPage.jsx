@@ -17,10 +17,10 @@ const tabs = [
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('create')
-    const {fetchAllProducts} = useInventoryStore()
+    const {fetchAllProducts, page, limit} = useInventoryStore()
 
     useEffect(()=>{
-        fetchAllProducts()
+        fetchAllProducts(page,limit)
     },[fetchAllProducts])
     
     return (
