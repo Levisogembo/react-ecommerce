@@ -12,18 +12,10 @@ const CreateCategoryForm = () => {
   const [newCategory, setNewCategory] = useState({
     name: "",
     description: "",
-    brand: "",
-    price: "",
-    quantity: "",
-    category: "",
-    file: null,
   })
 
   const { loading, createCategory } = useInventoryStore()
-  useEffect(() => {
-    createCategory()
-  }, [])
- 
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
     await createCategory(newCategory)

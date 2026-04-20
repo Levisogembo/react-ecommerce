@@ -5,18 +5,52 @@ import { restInstance, graphqlInstance } from "../lib/axios";
 
 export const useInventoryStore = create((set, get) => ({
     categories: [],
+    categoryOptions: [],
     loading: false,
     products: [],
     page: 1,
+    categoryPage: 1,
+    categoryLimit: 10,
     limit: 10,
     total: 0,
+    categoryTotal: 0,
 
-    fetchCategories: async () => {
-        set({ loading: true })
+    fetchCategories: async (categoryPage, categoryLimit) => {
+        set({ loading: true, categoryPage })
 
         const query = `
-            query GetAllCategories {
-                getAllCategories {
+            query GetAllCategories ($page: Float!, $limit: Float!) {
+                getAllCategories (page: $page, limit: $limit) {
+                    category {
+                        categoryId
+                        name
+                        description
+                    }
+                    total
+                }
+            }
+        `
+        const variables = { page: categoryPage, limit: categoryLimit }
+        try {
+            const res = await graphqlInstance.post('', { query, variables })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+            const { category, total } = res.data.data.getAllCategories
+            console.log(category);
+
+            set({ categories: category, categoryTotal: total, loading: false })
+        } catch (error) {
+            set({ loading: false })
+            const message = error.errors?.[0]?.message || "Error in fetching categories ";
+            toast.error(message)
+        }
+    },
+
+    fetchCategoryOptions: async () => {
+        const query = `
+            query GetCategoryOptions {
+                getCategoryOptions {
                     categoryId
                     name
                 }
@@ -24,16 +58,19 @@ export const useInventoryStore = create((set, get) => ({
         `
         try {
             const res = await graphqlInstance.post('', { query })
+
             if (res.data.errors) {
-                toast.error(res.data.errors[0].message)
+                throw new Error(res.data.errors[0].message)
             }
-            set({ categories: res.data.data.getAllCategories, loading: false })
+
+            set({ categoryOptions: res.data.data.getCategoryOptions })
+
         } catch (error) {
-            set({ loading: false })
-            const message = error.errors?.[0]?.message || "Error in signup";
+            const message = error.message || "Error fetching category options"
             toast.error(message)
         }
     },
+
 
     createProduct: async (newProduct) => {
         set({ loading: true })
@@ -69,8 +106,8 @@ export const useInventoryStore = create((set, get) => ({
     },
 
     updateProduct: async (productId, updatePayload) => {
-        console.log(updatePayload);
-        
+        //console.log(updatePayload);
+
         set({ loading: true })
         try {
             const formData = new FormData()
@@ -94,7 +131,7 @@ export const useInventoryStore = create((set, get) => ({
                 ),
             }))
             toast.success('Product updated successfully')
-            set({loading:false})
+            set({ loading: false })
         } catch (error) {
             set({ loading: false })
             const message = error.message || "Error updating product"
@@ -103,10 +140,64 @@ export const useInventoryStore = create((set, get) => ({
     },
 
     deleteProduct: async (productId) => {
-
+        set({ loading: true })
+        const mutation = `
+            mutation DeleteProduct($productId: String!){
+                deleteProduct(productId: $productId)
+            }
+        `
+        const variables = { productId }
+        try {
+            const res = await graphqlInstance.post('', { query: mutation, variables })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+            set((previousState) => ({
+                products: previousState.products.filter((product) => product.productId !== productId)
+            }))
+            toast.success('Product deleted successfully')
+            set({ loading: false })
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error updating product"
+            toast.error(message)
+        }
     },
 
-    toggleFeaturedProduct: async () => {
+    toggleFeaturedProduct: async (productId) => {
+        set({ loading: true })
+        let states
+        set((state) => ({
+            states: state,
+
+            products: state.products.map((product) =>
+                product.productId === productId
+                    ? { ...product, isFeatured: !product.isFeatured }
+                    : product
+            ),
+        }));
+        console.log(states);
+
+
+        const mutation = `
+            mutation ToggleProduct($productId: String!){
+                toggleProduct(productId: $productId)
+            }
+        `
+        const variables = { productId }
+        try {
+            const res = await graphqlInstance.post('', { query: mutation, variables })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+
+            set({ loading: false })
+            toast.success('Product toggled successfully')
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error updating product"
+            toast.error(message)
+        }
 
     },
 
@@ -176,12 +267,14 @@ export const useInventoryStore = create((set, get) => ({
         //console.log(variables);
 
         try {
-            const res = graphqlInstance.post('', { query, variables })
+            const res = await graphqlInstance.post('', { query, variables })
             if (res.data.errors) {
                 throw new Error(res.data.errors[0].message)
             }
-            console.log(res.data);
-
+            set((previousState) => ({
+                categories: [...previousState.categories, res.data.data.createCategory],
+                categoryOptions: [...previousState.categoryOptions, res.data.data.createCategory],
+            }))
             set({ loading: false })
             toast.success('Category created successfully')
         } catch (error) {

@@ -19,15 +19,17 @@ const CreateProductForm = () => {
     file: null,
   })
 
-  const { loading, categories, fetchCategories, createProduct } = useInventoryStore()
+  const { loading, categoryOptions, fetchCategoryOptions, createProduct } = useInventoryStore()
   useEffect(() => {
-    fetchCategories()
+    if (categoryOptions.length === 0) {
+      fetchCategoryOptions()
+    }
   }, [])
-  console.log(categories);
-  
+  //console.log(categoryOptions);
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if(!newProduct.file){
+    if (!newProduct.file) {
       toast.error('Please upload an image for the product')
       return
     }
@@ -154,7 +156,7 @@ const CreateProductForm = () => {
             required
           >
             <option value=''>Select a category</option>
-            {loading ? <option disabled>Loading...</option> : categories.map((category) => (
+            {loading ? <option disabled>Loading...</option> : categoryOptions.map((category) => (
               <option key={category.categoryId} value={category.categoryId}>
                 {category.name}
               </option>

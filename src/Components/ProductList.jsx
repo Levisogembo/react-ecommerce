@@ -3,11 +3,14 @@ import { useInventoryStore } from '../stores/useInventoryStore'
 import { motion } from 'framer-motion'
 import { Edit, Star, Trash, ChevronLeft, ChevronRight } from 'lucide-react'
 import EditProductModal from './EditProductModal'
+import DeleteProductModal from './DeleteProductModal'
 
 const ProductList = () => {
   const { deleteProduct, toggleFeaturedProduct, products, page, limit, total, fetchAllProducts, loading, categories } = useInventoryStore()
   //console.log(products[0]);
   const [editingProduct, setEditingProduct] = useState(null)
+  const [deletingProduct, setDeletingProduct] = useState(null)
+
   const totalPages = Math.ceil(total / limit)
   const handlePreviousPage = async () => {
     if (page > 1) {
@@ -142,7 +145,7 @@ const ProductList = () => {
                 </div>
               </td>
               <td className='px-6 py-4 whitespace-nowrap'>
-                <div className='text-sm text-gray-300'>Ksh {product.price.toFixed(2)}</div>
+                <div className='text-sm text-gray-300'>Ksh {product.price}</div>
               </td>
               <td className='px-6 py-4 whitespace-nowrap'>
                 <div className='text-sm text-gray-300'>{product.category.name}</div>
@@ -165,7 +168,7 @@ const ProductList = () => {
               <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                 <div className='flex items-center gap-3'>
                   <button
-                    onClick={() => deleteProduct(product.productId)}
+                    onClick={() => setDeletingProduct(product)}
                     className='text-red-400 hover:text-red-300'
                   >
                     <Trash className='h-5 w-5' />
@@ -176,14 +179,18 @@ const ProductList = () => {
                     className='text-green-300 hover:text-green-400'
                   >
                     <Edit className='h-5 w-5' />
-                  </button>
-                  {editingProduct && <EditProductModal product={editingProduct} categories={categories} onClose={()=>setEditingProduct(null)}/>}
+                  </button>   
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {editingProduct && <EditProductModal product={editingProduct} categories={categories} onClose={()=>setEditingProduct(null)}/>}
+      {deletingProduct && <DeleteProductModal product={deletingProduct} onClose={()=>setDeletingProduct(null)} onConfirm={() => {
+            deleteProduct(deletingProduct.productId)
+            setDeletingProduct(null)
+        }}/>}
       {/* pagination controls */}
       <div className='flex items-center justify-between px-6 py-4 border-t border-gray-700'>
 

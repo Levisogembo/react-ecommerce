@@ -14,7 +14,8 @@ const EditProductModal = ({ product, onClose, categories }) => {
     })
     const { updateProduct } = useInventoryStore()
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value })
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
     }
 
     const handleSubmit = async (e) => {
@@ -69,7 +70,7 @@ const EditProductModal = ({ product, onClose, categories }) => {
                                 type='file'
                                 accept='image/*'
                                 className='hidden'
-                                id='file'
+                                id='edit-product-file'
                                 onChange={(e) => {
                                     e.preventDefault();
                                     const file = e.target.files?.[0];
@@ -81,8 +82,10 @@ const EditProductModal = ({ product, onClose, categories }) => {
                                         }));
                                     }
                                 }}
+                                onClick={()=>console.log('buttion clicked')
+                                }
                             />  
-                            <label htmlFor='file' className='ml-auto text-xs text-emerald-400 cursor-pointer hover:text-emerald-300'>
+                            <label htmlFor='edit-product-file' className='ml-auto text-xs text-emerald-400 cursor-pointer hover:text-emerald-300'>
                                 Browse
                             </label>
                         </div>

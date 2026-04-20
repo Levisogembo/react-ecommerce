@@ -7,48 +7,51 @@ import AnalyticsTab from '../Components/AnalyticsTab'
 import { useInventoryStore } from '../stores/useInventoryStore'
 import CategoriesTab from '../Components/CategoriesTab'
 import CreateCategoryForm from './createCategoryForm'
+import CategoriesList from './CategoriesList'
 
 const tabs = [
     { id: "create", label: "Create Category", icon: PlusCircle },
-    { id: "categories", label: "Categories", icon: Grid },
+    { id: "list", label: "Categories", icon: Grid },
 ]
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('create')
-    const {fetchAllProducts} = useInventoryStore()
-
-    useEffect(()=>{
-        fetchAllProducts()
-    },[fetchAllProducts])
+    const {categories} = useInventoryStore()
+   
+    // useEffect(()=>{
+    //     fetchAllProducts()
+    // },[fetchAllProducts])
     
     return (
-        <div className='min-h-screen relative overflow-hidden'>
-            <div className='relative z-10 container mx-auto px-4 py-16'>
-                <motion.p className='text-4xl font-bold mb-8 text-emerald-400 text-center'
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}>Categories</motion.p>
-                <div className='flex justify-center mb-8'>
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center px-4 py-2 mx-2 rounded-md transition-colors duration-200 ${activeTab === tab.id
-                                    ? "bg-emerald-600 text-white"
-                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                                }`}
-                        >
-                            <tab.icon className='mr-2 h-5 w-5' />
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-                {activeTab === "create" && <CreateCategoryForm/>}
-                {activeTab === "products" && <ProductList/>}
-                {activeTab === "analytics" && <AnalyticsTab/>}
-                {activeTab === "categories" && <CategoriesTab/>}
-            </div>
+        <div className="grid grid-cols-12 gap-6">
+        {/* Sidebar */}
+        <div className="col-span-3 bg-gray-800 rounded-xl p-4">
+          <p className="text-emerald-400 font-semibold mb-4">Manage Categories</p>
+      
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`w-full text-left px-3 py-2 rounded-md mb-2 transition ${
+                activeTab === tab.id
+                  ? "bg-emerald-600 text-white"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </div>
+            </button>
+          ))}
         </div>
+      
+        {/* Content */}
+        <div className="col-span-9 bg-gray-900 rounded-xl p-6">
+          {activeTab === "create" && <CreateCategoryForm />}
+          {activeTab === "list" && <CategoriesList />}
+        </div>
+      </div>
     )
 }
 
