@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { useInventoryStore } from '../stores/useInventoryStore'
 import { motion } from 'framer-motion'
 import { Edit, Star, Trash, ChevronLeft, ChevronRight } from 'lucide-react'
-import EditProductModal from './EditProductModal'
-import DeleteProductModal from './DeleteProductModal'
+import EditProductModal from '../Modals/EditProductModal'
+import DeleteProductModal from '../Modals/DeleteProductModal'
 
 const ProductList = () => {
   const { deleteProduct, toggleFeaturedProduct, products, page, limit, total, fetchAllProducts, loading, categories } = useInventoryStore()

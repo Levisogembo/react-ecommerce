@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react'
 import { useInventoryStore } from '../stores/useInventoryStore'
 import { motion } from 'framer-motion'
 import { Edit, Star, Trash, ChevronLeft, ChevronRight } from 'lucide-react'
-import EditProductModal from './EditProductModal'
-import DeleteProductModal from './DeleteProductModal'
+import EditProductModal from '../Modals/EditProductModal'
+import DeleteProductModal from '../Modals/DeleteProductModal'
+import DeleteCategoryModal from '../Modals/DeleteCategoryModal'
+import EditCategoryModal from '../Modals/EditCategoryModal'
 
 const CategoriesList = () => {
-    const { deleteProduct, categoryPage, categoryLimit, categoryTotal, fetchCategories, loading, categories } = useInventoryStore()
+    const { deleteCategory, categoryPage, categoryLimit, categoryTotal, fetchCategories, loading, categories } = useInventoryStore()
     //console.log(products[0]);
-    const [editingProduct, setEditingProduct] = useState(null)
-    const [deletingProduct, setDeletingProduct] = useState(null)
+    const [editingCategory, setEditingCategory] = useState(null)
+    const [deletingCategory, setDeletingCategory] = useState(null)
 
     useEffect(() => {
         fetchCategories(categoryPage,categoryLimit)
@@ -111,14 +113,14 @@ const CategoriesList = () => {
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                                 <div className='flex items-center gap-3'>
                                     <button
-                                        onClick={() => setDeletingProduct(product)}
+                                        onClick={() => setDeletingCategory(category)}
                                         className='text-red-400 hover:text-red-300'
                                     >
                                         <Trash className='h-5 w-5' />
                                     </button>
 
                                     <button
-                                        onClick={() => setEditingProduct(product)}
+                                        onClick={() => setEditingCategory(category)}
                                         className='text-green-300 hover:text-green-400'
                                     >
                                         <Edit className='h-5 w-5' />
@@ -129,10 +131,10 @@ const CategoriesList = () => {
                     ))}
                 </tbody>
             </table>
-            {editingProduct && <EditProductModal product={editingProduct} categories={categories} onClose={() => setEditingProduct(null)} />}
-            {deletingProduct && <DeleteProductModal product={deletingProduct} onClose={() => setDeletingProduct(null)} onConfirm={() => {
-                deleteProduct(deletingProduct.productId)
-                setDeletingProduct(null)
+            {editingCategory && <EditCategoryModal category={editingCategory} onClose={() => setEditingCategory(null)} />}
+            {deletingCategory && <DeleteCategoryModal category={deletingCategory} onClose={() => setDeletingCategory(null)} onConfirm={() => {
+                deleteCategory(deletingCategory.categoryId)
+                setDeletingCategory(null)
             }} />}
             {/* pagination controls */}
             <div className='flex items-center justify-between px-6 py-4 border-t border-gray-700'>

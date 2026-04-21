@@ -164,6 +164,32 @@ export const useInventoryStore = create((set, get) => ({
         }
     },
 
+    deleteCategory: async (categoryId) => {
+        set({ loading: true })
+        const mutation = `
+            mutation DeleteCategory($categoryId: String!){
+                deleteCategory(categoryId: $categoryId)
+            }
+        `
+        const variables = { categoryId }
+        try {
+            const res = await graphqlInstance.post('', { query: mutation, variables })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+            set((previousState) => ({
+                categoryOptions: previousState.categoryOptions.filter((category) => category.categoryId !== categoryId),
+                categories: previousState.categories.filter((category) => category.categoryId !== categoryId)
+            }))
+            toast.success('Category deleted successfully')
+            set({ loading: false })
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error updating category"
+            toast.error(message)
+        }
+    },
+
     toggleFeaturedProduct: async (productId) => {
         set({ loading: true })
         let states
@@ -277,6 +303,61 @@ export const useInventoryStore = create((set, get) => ({
             }))
             set({ loading: false })
             toast.success('Category created successfully')
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error fetching categories"
+            toast.error(message)
+        }
+    },
+
+    updateCategory: async (categoryId, updatePayload) => {
+        set({ loading: true })
+        const mutation = `
+            mutation UpdateCategory ($categoryId: String!, $updateCategoryInput: updateCategoryInput!){
+                updateCategory (categoryId: $categoryId, updateCategoryInput: $updateCategoryInput){
+                    categoryId
+                    name
+                    description
+                }
+            }
+        `
+        const categoryPayload = Object.fromEntries(
+            Object.entries(updatePayload).filter(([_, value]) => {
+              return (
+                value !== undefined &&
+                value !== null &&
+                !(typeof value === 'string' && value.trim() === '')
+              );
+            })
+          )
+          console.log(categoryPayload);
+          
+        const variables = {
+            categoryId,
+            updateCategoryInput: categoryPayload
+        }
+
+        try {
+            const res = await graphqlInstance.post('', { query: mutation, variables })
+            if (res.data.errors) {
+                throw new Error(res.data.errors[0].message)
+            }
+            const updatedCategory = res.data.data.updateCategory
+
+            
+            if (!updatedCategory) {
+                throw new Error('Update failed — no data returned')
+            }
+            set((previousState) => ({
+                categories: previousState.categories.map((cat) =>
+                    cat.categoryId === categoryId ? updatedCategory : cat
+                ),
+                categoryOptions: previousState.categoryOptions.map((cat) =>
+                    cat.categoryId === categoryId ? updatedCategory : cat
+                )
+            }))
+            set({ loading: false })
+            toast.success('Category updated successfully')
         } catch (error) {
             set({ loading: false })
             const message = error.message || "Error fetching categories"
