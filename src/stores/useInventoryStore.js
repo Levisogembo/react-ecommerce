@@ -176,6 +176,7 @@ export const useInventoryStore = create((set, get) => ({
             const res = await graphqlInstance.post('', { query: mutation, variables })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
+                return
             }
             set((previousState) => ({
                 categoryOptions: previousState.categoryOptions.filter((category) => category.categoryId !== categoryId),
@@ -240,6 +241,7 @@ export const useInventoryStore = create((set, get) => ({
                     brand
                     price
                     quantity
+                    soldQuantity
                     isFeatured
                     reservedQuantity
                     category {
