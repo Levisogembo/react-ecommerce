@@ -7,10 +7,10 @@ import ProductCard from '../Components/ProductCard'
 const CategoryPage = () => {
     const { loading, categoryProducts, getProductsByCategory } = useCategoryStore()
     const { category } = useParams()
+
     useEffect(() => {
         getProductsByCategory(category)
     }, [getProductsByCategory, category])
-    //console.log(categoryProducts[0].images[0]);
     
     return (
         <div className='min-h-screen'>
@@ -33,7 +33,7 @@ const CategoryPage = () => {
                         No products found
                     </h2>)}
                     {
-                      categoryProducts && categoryProducts.length &&  categoryProducts.map((product)=>{
+                      categoryProducts && categoryProducts.length > 0 &&  categoryProducts.map((product)=>{
                            return <ProductCard key={product.productId} product={product}/>
                         })
                     }

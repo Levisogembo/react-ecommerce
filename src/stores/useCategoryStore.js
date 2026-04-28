@@ -14,8 +14,8 @@ export const useCategoryStore = create((set, get) => ({
                 toast.error(res.data.errors[0].message)
                 return
             }
-            const updatedCategory = res.data.total ? res.data.total : res.data
-            set({ categoryProducts: updatedCategory, loading: false })
+            const products = res.data.total > 0 ? res.data.products : []
+            set({ categoryProducts: products, loading: false })
         } catch (error) {
             set({ loading: false })
             const message = error.message || "Error creating product"
