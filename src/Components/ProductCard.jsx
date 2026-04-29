@@ -6,6 +6,8 @@ import { useCartStore } from '../stores/useCartStore'
 
 
 const ProductCard = ({ product }) => {
+    //console.log(product);
+    
     const { user } = useUserStore()
     const {addToCart} = useCartStore()
     const handleAddCart = () => {
