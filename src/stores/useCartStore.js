@@ -9,8 +9,13 @@ export const useCartStore = create((set, get) => ({
     loading: false,
     total: 0,
     subTotal: 0,
-    coupon: false,
-    isCouponApplied:false,
+    coupon: null,
+    personalCoupon: null,
+    publicCoupons: [],
+    validating: false,
+    discountAmount: 0,
+    isCouponApplied: false,
+    recommendations: [],
 
     getCartItems: async () => {
         try {
@@ -117,5 +122,105 @@ export const useCartStore = create((set, get) => ({
             total = subTotal - discount
         }
         set({ total, subTotal })
+    },
+
+    getRecommendations: async () => {
+        set({ loading: true })
+        try {
+            const res = await restInstance.get("/cart/recommendations")
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            set({ recommendations: res.data })
+            set({ loading: false })
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error loading recommendations"
+            toast.error(message)
+        }
+    },
+
+    getMyCoupon: async () => {
+        try {
+            const res = await restInstance.get('/coupon/my-coupon')
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            set({ personalCoupon: res.data })
+        } catch (error) {
+            set({ personalCoupon: null })
+            const message = error.message || "Error loading coupons"
+            toast.error(message)
+        }
+    },
+
+    getPublicCoupons: async () => {
+        try {
+            const res = await restInstance.get('/coupon/public')
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            set({ publicCoupons: res.data })
+        } catch (error) {
+            set({ publicCoupons: [] })
+            const message = error.message || "Error loading coupons"
+            toast.error(message)
+        }
+    },
+
+    validateCoupon: async (code, cartTotal) => {
+        if (!code.trim()) {
+            toast.error('Please enter a coupon code')
+            return
+        }
+    
+        set({ validating: true })
+    
+        try {
+            const res = await restInstance.post('/coupon/validate', {
+                code,
+                cartTotal
+            })
+    
+            const { couponId, code: validatedCode, discountType, discountValue, discountAmount, finalAmount } = res.data
+            set({
+                coupon: {
+                    couponId,
+                    code: validatedCode,
+                    discountType,
+                    discountValue,
+                    discountPercentage: discountType === 'percentage' ? discountValue : 0,
+                },
+                isCouponApplied: true,
+                discountAmount,
+                total: finalAmount,
+                validating: false
+            })
+    
+            // recalculate totals with the new coupon
+            get().calculateTotals()
+    
+            toast.success(`Coupon "${validatedCode}" applied successfully`)
+    
+        } catch (error) {
+            set({ validating: false })
+            const message = error.response?.data?.message || 'Invalid coupon code'
+            toast.error(message)
+        }
+    },
+    
+    removeCoupon: () => {
+        set({
+            coupon: null,
+            isCouponApplied: false,
+            discountAmount: 0,
+        })
+        // recalculate totals without coupon
+        get().calculateTotals()
+    
+        toast.success('Coupon removed')
     }
 }))

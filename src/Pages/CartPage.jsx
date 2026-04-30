@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useCartStore } from '../stores/useCartStore'
 import { motion } from 'framer-motion'
 import { ShoppingCart } from 'lucide-react'
@@ -9,7 +9,12 @@ import OrderSummary from '../Components/OrderSummary'
 import GiftCouponCard from '../Components/GiftCouponCard'
 
 const CartPage = () => {
-    const { cart } = useCartStore()
+    const { cart, getRecommendations, recommendations, subTotal } = useCartStore()
+
+    useEffect(()=>{
+        getRecommendations()
+    },[getRecommendations, cart])
+
     return (
         <div className='py-8 md:py-16'>
             <div className='mx-auto max-w-screen-x1 px-4 2xl:px-0'>
@@ -29,7 +34,7 @@ const CartPage = () => {
                                 ))}
                             </div>
                         )}
-                        {cart.length > 0 && <PeopleAlsoBought />}
+                        {cart.length > 0 && recommendations.length > 0 && <PeopleAlsoBought />}
                     </motion.div>
 
                     {cart.length > 0 && (
@@ -40,7 +45,7 @@ const CartPage = () => {
                             transition={{ duration: 0.5, delay: 0.4 }}
                         >
                             <OrderSummary/>
-                            {/* <GiftCouponCard/> */}
+                            <GiftCouponCard cartTotal={subTotal}/>
                         </motion.div>
                     )}
                 </div>

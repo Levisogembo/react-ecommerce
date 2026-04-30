@@ -15,7 +15,7 @@ import CartPage from "./Pages/CartPage"
 function App() {
   // const [count, setCount] = useState(0)
   const { checkingAuth, checkAuth, googleRedirect } = useUserStore()
-  const { getCartItems } = useCartStore()
+  const { getCartItems, getMyCoupon, getPublicCoupons, publicCoupons } = useCartStore()
 
   useEffect(() => {
     googleRedirect()
@@ -27,9 +27,11 @@ function App() {
   useEffect(() => {
     if (user) {
       getCartItems()
+      getMyCoupon()
+      getPublicCoupons()
     }
   },[getCartItems,user])
-
+  
 
   if (checkingAuth) return <LoadingSpinner />
 
