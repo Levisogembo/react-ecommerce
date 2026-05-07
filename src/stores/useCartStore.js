@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { restInstance } from "../lib/axios";
+import { graphqlInstance, restInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
 
@@ -16,6 +16,10 @@ export const useCartStore = create((set, get) => ({
     discountAmount: 0,
     isCouponApplied: false,
     recommendations: [],
+    checkoutStep: 'idle',
+    checkoutRequestId: null,
+    pollingInterval: null,
+    paymentError: null,
 
     getCartItems: async () => {
         try {
@@ -36,7 +40,7 @@ export const useCartStore = create((set, get) => ({
 
     addToCart: async ({ productId, description, name, price, images }) => {
         const fileName = images[0].fileName
-        const productCart = { productId, description, name, price, fileName };
+        const productCart = { productId, description, name, unitPrice: price, fileName };
         //console.log(productCart);, 
         try {
             const res = await restInstance.post('/cart', productCart)
@@ -114,7 +118,7 @@ export const useCartStore = create((set, get) => ({
     calculateTotals: () => {
         const { cart, coupon } = get()
         const subTotal = cart.reduce((sum, item) => {
-            return sum += item.price * item.quantity
+            return sum += item.unitPrice * item.quantity
         }, 0)
         let total = subTotal
         if (coupon) {
@@ -176,15 +180,15 @@ export const useCartStore = create((set, get) => ({
             toast.error('Please enter a coupon code')
             return
         }
-    
+
         set({ validating: true })
-    
+
         try {
             const res = await restInstance.post('/coupon/validate', {
                 code,
                 cartTotal
             })
-    
+
             const { couponId, code: validatedCode, discountType, discountValue, discountAmount, finalAmount } = res.data
             set({
                 coupon: {
@@ -199,19 +203,19 @@ export const useCartStore = create((set, get) => ({
                 total: finalAmount,
                 validating: false
             })
-    
+
             // recalculate totals with the new coupon
             get().calculateTotals()
-    
+
             toast.success(`Coupon "${validatedCode}" applied successfully`)
-    
+
         } catch (error) {
             set({ validating: false })
             const message = error.response?.data?.message || 'Invalid coupon code'
             toast.error(message)
         }
     },
-    
+
     removeCoupon: () => {
         set({
             coupon: null,
@@ -220,7 +224,219 @@ export const useCartStore = create((set, get) => ({
         })
         // recalculate totals without coupon
         get().calculateTotals()
-    
+
         toast.success('Coupon removed')
+    },
+
+    //payments integration
+    initiateCheckout: () => {
+        const { cart } = get()
+
+        if (!cart.length) {
+            toast.error('Your cart is empty')
+            return
+        }
+        set({ checkoutStep: 'selecting', paymentError: null })
+    },
+
+    selectMpesa: () => {
+        set({ checkoutStep: 'mpesa', paymentError: null })
+    },
+
+    initiateMpesaPayment: async ({ phone, query }) => {
+        //console.log(query);
+        const { total, coupon, isCouponApplied, cart } = get()
+        const cleanedPhone = get().formatPhone(phone)
+        if (!cleanedPhone) {
+            toast.error('Invalid phone number please try again')
+            return
+        }
+        set({ checkoutStep: 'processing', paymentError: null })
+        const mutation = `
+           mutation CreateNewOrder($orderPayload: createOrderInput!){
+                createNewOrder (orderPayload: $orderPayload){
+                    orderId
+                    total
+                    status
+                    mpesaCheckoutRequestId
+                    message
+                }
+            }
+        `
+        const items = cart.map((item) => {
+            const { name, fileName, description, ...data } = item
+            return data
+        })
+        
+        const variables = {
+            orderPayload: {
+                total,
+                phoneNumber: cleanedPhone,
+                paymentMethod: "MPESA",
+                items,
+                couponId: isCouponApplied && coupon ? coupon.couponId : null,
+                billingAddress: query
+            }
+        }
+        console.log(variables);
+        
+        try {
+            const res = await graphqlInstance.post('', { query: mutation, variables })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            const { mpesaCheckoutRequestId } = res.data.createNewOrder
+            set({ checkoutRequestId: mpesaCheckoutRequestId })
+            //poll for payment status
+
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to initiate payment'
+            set({ checkoutStep: 'failed', paymentError: message })
+            toast.error(message)
+        }
+    },
+
+    startPolling: (checkoutRequestId) => {
+        // clear any existing interval first
+        const existingInterval = get().pollingInterval
+        if (existingInterval) clearInterval(existingInterval)
+
+        // set timeout — stop polling after 2 minutes
+        const timeout = setTimeout(() => {
+            get().stopPolling()
+            set({
+                checkoutStep: 'failed',
+                paymentError: 'Payment confirmation timed out. Please try again.'
+            })
+            toast.error('Payment timed out. Please try again.')
+        }, 120000)  // 2 minutes
+
+        // poll every 5 seconds
+        const interval = setInterval(async () => {
+            try {
+                const res = await restInstance.get(`/mpesa/status/${checkoutRequestId}`)
+                const { status } = res.data
+
+                if (status === 'success') {
+                    clearTimeout(timeout)
+                    get().stopPolling()
+                    get().handlePaymentSuccess()
+                }
+
+                if (status === 'failed') {
+                    clearTimeout(timeout)
+                    get().stopPolling()
+                    get().handlePaymentFailure('Payment was cancelled or failed. Please try again.')
+                }
+
+                // status === 'pending' → keep polling
+
+            } catch (error) {
+                clearTimeout(timeout)
+                get().stopPolling()
+                get().handlePaymentFailure('Error checking payment status. Please try again.')
+            }
+        }, 5000)  // every 5 seconds
+
+        set({ pollingInterval: interval })
+    },
+
+    // stop polling — clear the interval
+    stopPolling: () => {
+        const interval = get().pollingInterval
+        if (interval) {
+            clearInterval(interval)
+            set({ pollingInterval: null })
+        }
+    },
+
+    // payment confirmed — create order and clear cart
+    handlePaymentSuccess: async () => {
+        try {
+            const { cart, total, coupon, isCouponApplied, checkoutRequestId } = get()
+
+            // create order in backend
+            await restInstance.post('/orders/create', {
+                items: cart,
+                totalAmount: total,
+                couponId: isCouponApplied && coupon ? coupon.couponId : null,
+                checkoutRequestId,
+                paymentMethod: 'mpesa'
+            })
+
+            // clear cart and coupon
+            set({
+                cart: [],
+                coupon: null,
+                isCouponApplied: false,
+                discountAmount: 0,
+                total: 0,
+                subTotal: 0,
+                checkoutStep: 'success',
+                checkoutRequestId: null,
+                paymentError: null
+            })
+
+            get().calculateTotals()
+            toast.success('Payment confirmed! Your order has been placed.')
+
+        } catch (error) {
+            const message = error.response?.data?.message || 'Order creation failed'
+            set({ checkoutStep: 'failed', paymentError: message })
+            toast.error(message)
+        }
+    },
+
+    // payment failed — reset and show error
+    handlePaymentFailure: (message) => {
+        set({
+            checkoutStep: 'failed',
+            paymentError: message,
+            checkoutRequestId: null
+        })
+        toast.error(message)
+    },
+
+    // cancel checkout — go back to idle
+    cancelCheckout: () => {
+        get().stopPolling()
+        set({
+            checkoutStep: 'idle',
+            checkoutRequestId: null,
+            paymentError: null
+        })
+    },
+
+    // go back to payment selection
+    backToSelection: () => {
+        get().stopPolling()
+        set({
+            checkoutStep: 'selecting',
+            checkoutRequestId: null,
+            paymentError: null
+        })
+    },
+
+    formatPhone: (phone) => {
+        const cleaned = phone.replace(/\s+/g, '').replace(/-/g, '')
+
+        // already in 254 format
+        if (/^2547\d{8}$/.test(cleaned) || /^2541\d{8}$/.test(cleaned)) {
+            return cleaned
+        }
+
+        // starts with 07 → convert to 2547
+        if (/^07\d{8}$/.test(cleaned)) {
+            return `254${cleaned.substring(1)}`
+        }
+
+        // starts with 01 → convert to 2541
+        if (/^01\d{8}$/.test(cleaned)) {
+            return `254${cleaned.substring(1)}`
+        }
+
+        // invalid
+        return null
     }
 }))

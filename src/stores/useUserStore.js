@@ -36,6 +36,7 @@ export const useUserStore = create((set, get) => ({
             // GraphQL errors come back as 200 — manually throw them
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
+                return
             }
             //console.log(res.data);
             set({ user: res.data.data.createUser, loading: false })

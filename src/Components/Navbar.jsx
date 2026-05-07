@@ -34,6 +34,13 @@ const Navbar = () => {
                                 <span className='hidden sm:inline'>Dashboard</span>
                             </Link>
                         )}
+                        {user && user.role === 'USER' && (
+                            <Link className='bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md font-medium
+								 transition duration-300 ease-in-out flex items-center' to={"/customer-dashboard"}>
+                                <Lock className='inline-block mr-1' size={18} ></Lock>
+                                <span className='hidden sm:inline'>Dashboard</span>
+                            </Link>
+                        )}
                         {
                             user ? (<button className='bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 
 						rounded-md flex items-center transition duration-300 ease-in-out' onClick={()=>logout(user)}>

@@ -10,7 +10,8 @@ import GiftCouponCard from '../Components/GiftCouponCard'
 
 const CartPage = () => {
     const { cart, getRecommendations, recommendations, subTotal } = useCartStore()
-
+    //console.log(cart);
+    
     useEffect(()=>{
         getRecommendations()
     },[getRecommendations, cart])

@@ -11,6 +11,7 @@ import { useEffect } from "react"
 import LoadingSpinner from "./Components/loadingSpinner"
 import CategoryPage from "./Pages/CategoryPage"
 import CartPage from "./Pages/CartPage"
+import CustomerPage from "./Pages/CustomerPage"
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -51,6 +52,7 @@ function App() {
           <Route path="/signup" element={user ? <Navigate to={'/'} /> : <Signup />}></Route>
           <Route path="/login" element={user ? <Navigate to={'/'} /> : <Login />}></Route>
           <Route path="/secret-dashboard" element={user && user.role === 'ADMIN' ? <AdminPage /> : <Navigate to={'/login'} />}></Route>
+          <Route path="/customer-dashboard" element={user && user.role === 'USER' ? <CustomerPage /> : <Navigate to={'/login'} />}></Route>
           <Route path="/category/:category" element={<CategoryPage />}></Route>
           <Route path="/cart" element={user ? <CartPage /> : <Navigate to={'/login'}/>}></Route>
         </Routes>
