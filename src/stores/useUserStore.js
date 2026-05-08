@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import {graphqlInstance } from '../lib/axios'
+import {graphqlInstance, restInstance } from '../lib/axios'
 import { toast } from 'react-hot-toast'
 
 export const useUserStore = create((set, get) => ({
@@ -70,6 +70,7 @@ export const useUserStore = create((set, get) => ({
             // GraphQL errors come back as 200 — manually throw them
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
+                return
             }
             const token = res.data.data.login
             localStorage.setItem('token', token)
@@ -82,11 +83,11 @@ export const useUserStore = create((set, get) => ({
 
 
         } catch (error) {
-            set({ loading: false })
+            set({ loading: false, user: null })
             //console.log("error obj", error);
             //alert(error)
             const message = error.errors?.[0]?.message || "Error in login";
-            //toast.error(message)
+            toast.error(message)
         }
     },
 
@@ -124,6 +125,7 @@ export const useUserStore = create((set, get) => ({
             const res = await graphqlInstance.post('', { query: mutation })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
+                return
             }
             localStorage.removeItem('token')
             set({ user: null, token: null })
@@ -150,6 +152,28 @@ export const useUserStore = create((set, get) => ({
         window.history.replaceState({}, '', '/')
 
         toast.success('Logged in with google successfully')
+    },
+
+    forgotPassword: async (email) => {
+        set({loading:true})
+        try {
+            const res = await restInstance.post("auth/forgot",{email})
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            set({loading:false})
+            toast.success("Your password recovery has been sent your mail")
+        } catch (error) {
+            set({loading:false})
+            if(/404/i.test(error)){
+                toast.error("Email could not be found please try again")
+                return
+            }
+            
+            const message = error.errors?.[0]?.message || "Error sending email";
+            toast.error(message)
+        }
     }
 
 }))

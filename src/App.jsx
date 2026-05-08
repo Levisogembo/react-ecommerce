@@ -12,6 +12,8 @@ import LoadingSpinner from "./Components/loadingSpinner"
 import CategoryPage from "./Pages/CategoryPage"
 import CartPage from "./Pages/CartPage"
 import CustomerPage from "./Pages/CustomerPage"
+import ForgotPassword from "./Pages/ForgotPassword"
+import PasswordReset from "./Pages/PasswordReset"
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -54,6 +56,8 @@ function App() {
           <Route path="/secret-dashboard" element={user && user.role === 'ADMIN' ? <AdminPage /> : <Navigate to={'/login'} />}></Route>
           <Route path="/customer-dashboard" element={user && user.role === 'USER' ? <CustomerPage /> : <Navigate to={'/login'} />}></Route>
           <Route path="/category/:category" element={<CategoryPage />}></Route>
+          <Route path="/forgot-password" element={<ForgotPassword />}></Route>
+          <Route path="/reset" element={<PasswordReset />}></Route>
           <Route path="/cart" element={user ? <CartPage /> : <Navigate to={'/login'}/>}></Route>
         </Routes>
       </div>

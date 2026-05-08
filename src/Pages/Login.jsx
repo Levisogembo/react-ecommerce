@@ -4,7 +4,7 @@ import { ArrowRight, Loader, Lock, LogIn, Mail, User, UserPlus } from 'lucide-re
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
 
-const Signup = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -129,10 +129,15 @@ const Signup = () => {
               Sign Up Now <ArrowRight className='inline h-4 w-4' />
             </Link>
           </p>
+          <p className='mt-8 text-center text-sm text-gray-400'>
+            <Link to='/forgot-password' className='font-medium text-emerald-400 hover:text-emerald-300'>
+              Forgot Password ? 
+            </Link>
+          </p>
         </div>
       </motion.div>
     </div>
   )
 }
 
-export default Signup
+export default Login
