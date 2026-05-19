@@ -18,6 +18,7 @@ export const useCartStore = create((set, get) => ({
     recommendations: [],
     checkoutStep: 'idle',
     checkoutRequestId: null,
+    orderId: null,
     pollingInterval: null,
     paymentError: null,
 
@@ -267,7 +268,7 @@ export const useCartStore = create((set, get) => ({
             const { name, fileName, description, ...data } = item
             return data
         })
-        
+
         const variables = {
             orderPayload: {
                 total,
@@ -278,18 +279,29 @@ export const useCartStore = create((set, get) => ({
                 billingAddress: query
             }
         }
-        console.log(variables);
-        
+        //console.log(variables);
+
         try {
             const res = await graphqlInstance.post('', { query: mutation, variables })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
                 return
             }
-            const { mpesaCheckoutRequestId } = res.data.createNewOrder
-            set({ checkoutRequestId: mpesaCheckoutRequestId })
-            //poll for payment status
+            const order = res.data.data.createNewOrder
+            //console.log('Order response:', order)  // debug
 
+            const { orderId } = order
+            //console.log('orderId:', orderId)
+            if (!orderId) {
+                set({
+                    checkoutStep: 'failed',
+                    paymentError: 'Failed to initiate MPesa payment. Please try again.'
+                })
+                return
+            }
+            set({ orderId})
+            //poll for payment status
+            get().startPolling(orderId)
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to initiate payment'
             set({ checkoutStep: 'failed', paymentError: message })
@@ -297,12 +309,12 @@ export const useCartStore = create((set, get) => ({
         }
     },
 
-    startPolling: (checkoutRequestId) => {
+    startPolling: (orderId) => {
         // clear any existing interval first
         const existingInterval = get().pollingInterval
         if (existingInterval) clearInterval(existingInterval)
 
-        // set timeout — stop polling after 2 minutes
+        // timeout after 2 minutes
         const timeout = setTimeout(() => {
             get().stopPolling()
             set({
@@ -310,34 +322,45 @@ export const useCartStore = create((set, get) => ({
                 paymentError: 'Payment confirmation timed out. Please try again.'
             })
             toast.error('Payment timed out. Please try again.')
-        }, 120000)  // 2 minutes
+        }, 120000)
 
-        // poll every 5 seconds
         const interval = setInterval(async () => {
             try {
-                const res = await restInstance.get(`/mpesa/status/${checkoutRequestId}`)
-                const { status } = res.data
+                const currentCheckoutId = get().orderId
+                console.log('Polling with ID:', currentCheckoutId)
+
+                if (!currentCheckoutId) {
+                    console.error('No checkoutRequestId available — stopping poll')
+                    clearTimeout(timeout)
+                    get().stopPolling()
+                    get().handlePaymentFailure('Payment session lost. Please try again.')
+                    return
+                }
+
+                const res = await restInstance.get(`/mpesa/status/${orderId}`)
+                const { status, message } = res.data
+
+                console.log('Poll response:', { status, message })
 
                 if (status === 'success') {
                     clearTimeout(timeout)
                     get().stopPolling()
                     get().handlePaymentSuccess()
+                    return
                 }
 
                 if (status === 'failed') {
                     clearTimeout(timeout)
                     get().stopPolling()
-                    get().handlePaymentFailure('Payment was cancelled or failed. Please try again.')
+                    get().handlePaymentFailure(message || 'Payment failed. Please try again.')
+                    return
                 }
 
-                // status === 'pending' → keep polling
-
             } catch (error) {
-                clearTimeout(timeout)
-                get().stopPolling()
-                get().handlePaymentFailure('Error checking payment status. Please try again.')
+                console.error('Polling error:', error.message, error.response?.status)
+                // don't stop polling on network errors — just log and continue
             }
-        }, 5000)  // every 5 seconds
+        }, 5000)
 
         set({ pollingInterval: interval })
     },
@@ -351,51 +374,41 @@ export const useCartStore = create((set, get) => ({
         }
     },
 
-    // payment confirmed — create order and clear cart
+
     handlePaymentSuccess: async () => {
+        // clear cart and coupon locally
+        set({
+            cart: [],
+            coupon: null,
+            isCouponApplied: false,
+            discountAmount: 0,
+            total: 0,
+            subTotal: 0,
+            checkoutStep: 'success',
+            checkoutRequestId: null,
+            orderId: null,
+            paymentError: null,
+            personalCoupon: null
+        })
+
         try {
-            const { cart, total, coupon, isCouponApplied, checkoutRequestId } = get()
-
-            // create order in backend
-            await restInstance.post('/orders/create', {
-                items: cart,
-                totalAmount: total,
-                couponId: isCouponApplied && coupon ? coupon.couponId : null,
-                checkoutRequestId,
-                paymentMethod: 'mpesa'
-            })
-
-            // clear cart and coupon
-            set({
-                cart: [],
-                coupon: null,
-                isCouponApplied: false,
-                discountAmount: 0,
-                total: 0,
-                subTotal: 0,
-                checkoutStep: 'success',
-                checkoutRequestId: null,
-                paymentError: null
-            })
-
-            get().calculateTotals()
-            toast.success('Payment confirmed! Your order has been placed.')
-
+            await restInstance.delete('/cart/clear')
         } catch (error) {
-            const message = error.response?.data?.message || 'Order creation failed'
-            set({ checkoutStep: 'failed', paymentError: message })
-            toast.error(message)
+            console.error('Failed to clear cart on backend:', error.message)
         }
+
+        get().calculateTotals()
+        toast.success('Payment confirmed! Your order has been placed.')
     },
 
     // payment failed — reset and show error
     handlePaymentFailure: (message) => {
         set({
             checkoutStep: 'failed',
-            paymentError: message,
+            paymentError: message || 'Payment failed please try again',
             checkoutRequestId: null
         })
-        toast.error(message)
+        toast.error(message || 'Payment failed please try again')
     },
 
     // cancel checkout — go back to idle

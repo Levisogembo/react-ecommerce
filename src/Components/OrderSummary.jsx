@@ -230,13 +230,13 @@ const OrderSummary = () => {
 
 											setResults([]);
 
-											console.log({
-												address: place.properties.name,
-												city: place.properties.city,
-												country: place.properties.country,
-												lon: place.geometry.coordinates[0],
-												lat: place.geometry.coordinates[1],
-											});
+											// console.log({
+											// 	address: place.properties.name,
+											// 	city: place.properties.city,
+											// 	country: place.properties.country,
+											// 	lon: place.geometry.coordinates[0],
+											// 	lat: place.geometry.coordinates[1],
+											// });
 										}}
 										className="cursor-pointer p-3 text-sm text-white hover:bg-gray-700"
 									>

@@ -17,6 +17,7 @@ const PasswordReset = () => {
         forgotPassword(email)
         setFormData("")
     }
+    console.log("Password reset mounted");
     return (
         <div className='flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
             <motion.div
