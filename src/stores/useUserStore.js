@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import {graphqlInstance, restInstance } from '../lib/axios'
+import { graphqlInstance, restInstance } from '../lib/axios'
 import { toast } from 'react-hot-toast'
 
 export const useUserStore = create((set, get) => ({
@@ -141,12 +141,12 @@ export const useUserStore = create((set, get) => ({
         const params = new URLSearchParams(window.location.search)
         const token = params.get('token')
 
-        if(!token) return
+        if (!token) return
 
-        localStorage.setItem('token',token)
+        localStorage.setItem('token', token)
 
         const decoded = JSON.parse(atob(token.split('.')[1]))
-        set({user:decoded,token})
+        set({ user: decoded, token })
 
         //remove the token from the url
         window.history.replaceState({}, '', '/')
@@ -155,23 +155,44 @@ export const useUserStore = create((set, get) => ({
     },
 
     forgotPassword: async (email) => {
-        set({loading:true})
+        set({ loading: true })
         try {
-            const res = await restInstance.post("auth/forgot",{email})
+            const res = await restInstance.post("auth/forgot", { email })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
                 return
             }
-            set({loading:false})
+            set({ loading: false })
             toast.success("Your password recovery has been sent your mail")
         } catch (error) {
-            set({loading:false})
-            if(/404/i.test(error)){
+            set({ loading: false })
+            if (/404/i.test(error)) {
                 toast.error("Email could not be found please try again")
                 return
             }
-            
+
             const message = error.errors?.[0]?.message || "Error sending email";
+            toast.error(message)
+        }
+    },
+
+    resetPassword: async ({ token, newPassword, confirmedPassword }) => {
+        if (newPassword !== confirmedPassword) {
+            toast.error("Passwords do not match")
+            return
+        }
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/i.test(newPassword)) {
+            return toast.error("Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 8 characters long")
+        }
+        try {
+            const res = await restInstance.post('auth/reset', { token, newPassword, confirmedPassword })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            return true
+        } catch (error) {
+            const message = error.errors?.[0]?.message || "Error resetting password";
             toast.error(message)
         }
     }

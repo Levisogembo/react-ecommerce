@@ -1,23 +1,33 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, Loader, Lock, LogIn, Mail, User, UserPlus } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
+import toast from 'react-hot-toast'
 
 const PasswordReset = () => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('token')
+
     const [formData, setFormData] = useState({
         newPassword: "",
         confirmedPassword: "",
     })
-    const { forgotPassword, loading } = useUserStore()
-
+    const { resetPassword, loading } = useUserStore()
+    const navigate = useNavigate()
     const handleSubmit = (e) => {
         e.preventDefault()
         //console.log(formData);
-        forgotPassword(email)
-        setFormData("")
+        const payload = {token,...formData}
+        const success = resetPassword(payload)
+        setFormData({newPassword:"",confirmedPassword:""})
+        if(success){
+            toast.success("Password reset successfully, you can now login")
+            setTimeout(()=>{
+                navigate("/login")
+            },1500)
+        }
     }
-    console.log("Password reset mounted");
     return (
         <div className='flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
             <motion.div
@@ -66,7 +76,7 @@ const PasswordReset = () => {
                                 </div>
                                 <input
                                     id='password-conf'
-                                    type='password-conf'
+                                    type='password'
                                     required
                                     value={formData.confirmedPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmedPassword: e.target.value })}

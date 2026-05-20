@@ -246,7 +246,7 @@ export const useCartStore = create((set, get) => ({
 
     initiateMpesaPayment: async ({ phone, query }) => {
         //console.log(query);
-        const { total, coupon, isCouponApplied, cart } = get()
+        const { total, coupon, isCouponApplied, cart, discountAmount } = get()
         const cleanedPhone = get().formatPhone(phone)
         if (!cleanedPhone) {
             toast.error('Invalid phone number please try again')
@@ -276,7 +276,8 @@ export const useCartStore = create((set, get) => ({
                 paymentMethod: "MPESA",
                 items,
                 couponId: isCouponApplied && coupon ? coupon.couponId : null,
-                billingAddress: query
+                billingAddress: query,
+                discountAmount
             }
         }
         //console.log(variables);
