@@ -35,6 +35,7 @@ export const useUserStore = create((set, get) => ({
             const res = await graphqlInstance.post('', { query: mutation, variables })
             // GraphQL errors come back as 200 — manually throw them
             if (res.data.errors) {
+                set({ loading: false })
                 toast.error(res.data.errors[0].message)
                 return
             }
@@ -69,6 +70,7 @@ export const useUserStore = create((set, get) => ({
             const res = await graphqlInstance.post('', { query: mutation, variables })
             // GraphQL errors come back as 200 — manually throw them
             if (res.data.errors) {
+                set({ loading: false })
                 toast.error(res.data.errors[0].message)
                 return
             }
@@ -95,6 +97,7 @@ export const useUserStore = create((set, get) => ({
         const token = localStorage.getItem('token')
         if (!token) {
             set({ user: null, token: null, checkingAuth: false })
+            return
         }
         try {
             const decoded = JSON.parse(atob(token.split('.')[1]))
@@ -179,21 +182,23 @@ export const useUserStore = create((set, get) => ({
     resetPassword: async ({ token, newPassword, confirmedPassword }) => {
         if (newPassword !== confirmedPassword) {
             toast.error("Passwords do not match")
-            return
+            return { success: false, error: "Passwords do not match" }
         }
         if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/i.test(newPassword)) {
-            return toast.error("Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 8 characters long")
+            toast.error("Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character, and be at least 8 characters long")
+            return { success: false, error: "Password validation failed" }
         }
         try {
             const res = await restInstance.post('auth/reset', { token, newPassword, confirmedPassword })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
-                return
+                return { success: false, error: res.data.errors[0].message }
             }
-            return true
+            return { success: true }
         } catch (error) {
             const message = error.errors?.[0]?.message || "Error resetting password";
             toast.error(message)
+            return { success: false, error: message }
         }
     }
 

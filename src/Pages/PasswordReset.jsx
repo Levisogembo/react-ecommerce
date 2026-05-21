@@ -15,13 +15,14 @@ const PasswordReset = () => {
     })
     const { resetPassword, loading } = useUserStore()
     const navigate = useNavigate()
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         //console.log(formData);
         const payload = {token,...formData}
-        const success = resetPassword(payload)
+        const results = await resetPassword(payload)
+        
         setFormData({newPassword:"",confirmedPassword:""})
-        if(success){
+        if(results.success){
             toast.success("Password reset successfully, you can now login")
             setTimeout(()=>{
                 navigate("/login")

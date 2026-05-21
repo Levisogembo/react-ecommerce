@@ -286,6 +286,10 @@ export const useCartStore = create((set, get) => ({
             const res = await graphqlInstance.post('', { query: mutation, variables })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
+                set({
+                    checkoutStep: 'idle',
+                    paymentError: 'Failed to initiate MPesa payment. Please try again.'
+                })
                 return
             }
             const order = res.data.data.createNewOrder
@@ -300,7 +304,7 @@ export const useCartStore = create((set, get) => ({
                 })
                 return
             }
-            set({ orderId})
+            set({ orderId })
             //poll for payment status
             get().startPolling(orderId)
         } catch (error) {

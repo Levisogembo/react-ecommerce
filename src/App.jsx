@@ -21,6 +21,28 @@ import ProtectedRoute from "./Components/ProtectedRoute"
 
 function App() {
   // const [count, setCount] = useState(0)
+  const { checkAuth, googleRedirect, user, checkingAuth } = useUserStore()
+  const { getCartItems, getMyCoupon, getPublicCoupons } = useCartStore()
+  useEffect(() => {
+    // only run googleRedirect on non-reset routes
+    const isResetRoute = window.location.pathname === '/reset'
+    if (!isResetRoute) {
+      googleRedirect()
+    }
+    checkAuth()
+  }, [])
+
+  useEffect(() => {
+
+    if (user) {
+      getCartItems()
+      getMyCoupon()
+      getPublicCoupons()
+    }
+  }, [user])
+  if (checkingAuth) {
+    return <LoadingSpinner />
+  }
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
       {/* Background gradient */}
@@ -34,43 +56,33 @@ function App() {
         <Navbar />
         <Routes>
 
-          {/*PUBLIC ROUTES*/}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/category/:category" element={<CategoryPage />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset" element={<PasswordReset />} />
-          </Route>
+          {/* PUBLIC ROUTES*/}
+          <Route path='/forgot-password' element={<ForgotPassword />} />
+          <Route path='/reset' element={<PasswordReset />} />
 
-          {/*GUEST ROUTES*/}
+          {/* GUEST ROUTES*/}
           <Route element={<GuestRoute />}>
-            <Route element={<PublicLayout />}>
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/login" element={<Login />} />
-            </Route>
+            <Route path='/signup' element={<Signup />} />
+            <Route path='/login' element={<Login />} />
           </Route>
 
-          {/*AUTHENTICATED ROUTES*/}
-          <Route element={<AppLayout />}>
+          {/* GENERAL ROUTES*/}
+          <Route path='/' element={<Homepage />} />
+          <Route path='/category/:category' element={<CategoryPage />} />
 
-            {/*USER PROTECTED*/}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/cart" element={<CartPage />} />
-            </Route>
+          {/* PROTECTED ROUTES*/}
+          <Route element={<ProtectedRoute />}>
+            <Route path='/cart' element={<CartPage />} />
+          </Route>
 
-            {/*ADMIN*/}
-            <Route element={<ProtectedRoute allowedRole="ADMIN" />}>
-              <Route path="/secret-dashboard" element={<AdminPage />} />
-            </Route>
+          {/* ADMIN ROUTES*/}
+          <Route element={<ProtectedRoute allowedRole='ADMIN' />}>
+            <Route path='/secret-dashboard' element={<AdminPage />} />
+          </Route>
 
-            {/*CUSTOMER*/}
-            <Route element={<ProtectedRoute allowedRole="USER" />}>
-              <Route
-                path="/customer-dashboard"
-                element={<CustomerPage />}
-              />
-            </Route>
-
+          {/* CUSTOMER ROUTES*/}
+          <Route element={<ProtectedRoute allowedRole='USER' />}>
+            <Route path='/customer-dashboard' element={<CustomerPage />} />
           </Route>
 
         </Routes>
