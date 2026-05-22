@@ -1,4 +1,4 @@
-import { BarChart, Grid, ListOrdered, PlusCircle, ShoppingBag, ShoppingBasket, ShoppingCart } from 'lucide-react'
+import { BadgePercent, BarChart, Grid, ListOrdered, PlusCircle, ShoppingBag, ShoppingBasket, ShoppingCart, Ticket } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import CreateProductForm from '../Components/CreateProductForm'
@@ -8,10 +8,13 @@ import { useInventoryStore } from '../stores/useInventoryStore'
 import CategoriesTab from '../Components/CategoriesTab'
 import CreateCategoryForm from './createCategoryForm'
 import CategoriesList from './CategoriesList'
+import CreateCouponForm from './CreateCouponForm'
 
 const tabs = [
     { id: "create", label: "Create Category", icon: PlusCircle },
     { id: "list", label: "Categories", icon: Grid },
+    { id: "coupon", label: "Create Coupons", icon: Ticket },
+    { id: "viewCoupon", label: "View Coupons", icon: BadgePercent },
 ]
 
 const AdminPage = () => {
@@ -49,6 +52,8 @@ const AdminPage = () => {
         {/* Content */}
         <div className="col-span-9 bg-gray-900 rounded-xl p-6">
           {activeTab === "create" && <CreateCategoryForm />}
+          {activeTab === "list" && <CategoriesList />}
+          {activeTab === "coupon" && <CreateCouponForm />}
           {activeTab === "list" && <CategoriesList />}
         </div>
       </div>

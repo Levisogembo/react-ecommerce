@@ -10,7 +10,7 @@ import CategoriesTab from '../Components/CategoriesTab'
 const tabs = [
     { id: "create", label: "Create Product", icon: PlusCircle },
     { id: "products", label: "Products", icon: ShoppingBasket },
-    { id: "categories", label: "Categories", icon: Grid },
+    { id: "categories", label: "Categories and Coupons", icon: Grid },
     { id: "orders", label: "Orders", icon: ShoppingCart },
     { id: "analytics", label: "Analytics", icon: BarChart }
 ]
