@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 export const useCategoryStore = create((set, get) => ({
     categoryProducts: [],
     loading: false,
+    featuredProducts: [],
 
     getProductsByCategory: async (categoryName) => {
         set({ loading: false })
@@ -36,6 +37,27 @@ export const useCategoryStore = create((set, get) => ({
 
         } catch (error) {
             set({ loading: false })
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Error creating coupon"
+
+            toast.error(message)
+        }
+    },
+
+    getFeaturedProducts: async () => {
+        set({ loading: true })
+        try {
+            const res = await restInstance.get('/product/featured')
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            set({ loading: false, featuredProducts: res.data })
+        } catch (error) {
+            set({ loading: false, featuredProducts: [] })
             const message =
                 error?.response?.data?.message ||
                 error?.response?.data?.error ||

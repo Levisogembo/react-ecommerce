@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import CategoryItem from '../Components/CategoryItem'
+import { useCategoryStore } from '../stores/useCategoryStore'
+import FeaturedProducts from '../Components/FeaturedProducts'
 
 const categories = [
   {
@@ -23,6 +25,13 @@ const categories = [
 ]
 
 const Homepage = () => {
+  const {getFeaturedProducts, featuredProducts, loading} = useCategoryStore()
+
+  useEffect(()=>{
+    getFeaturedProducts()
+  },[getFeaturedProducts])
+  //console.log(featuredProducts);
+  
   return (
     <div className='relative min-h-screen text-white overflow-hidden'>
       <div className='relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16'>
@@ -35,6 +44,8 @@ const Homepage = () => {
             })
           }
         </div>
+
+        {!loading && featuredProducts.length > 0 &&  <FeaturedProducts featuredProducts={featuredProducts}/> }
       </div>
     </div>
   )

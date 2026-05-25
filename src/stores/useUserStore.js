@@ -74,9 +74,9 @@ export const useUserStore = create((set, get) => ({
                 toast.error(res.data.errors[0].message)
                 return
             }
-            const token = res.data.data.login
-            localStorage.setItem('token', token)
-
+            const { accessToken, refreshToken } = res.data.data.login
+            localStorage.setItem('token', accessToken)
+            localStorage.setItem('refreshToken', refreshToken)
             //decode user token
             const decodedToken = JSON.parse(atob(token.split('.')[1]))
             //console.log(decodedToken);
@@ -95,58 +95,89 @@ export const useUserStore = create((set, get) => ({
 
     checkAuth: async () => {
         const token = localStorage.getItem('token')
-        if (!token) {
+        const refreshToken = localStorage.getItem('refreshToken')
+
+        if (!token && !refreshToken) {
             set({ user: null, token: null, checkingAuth: false })
             return
         }
+
         try {
             const decoded = JSON.parse(atob(token.split('.')[1]))
             const isExpired = decoded.exp * 1000 < Date.now()
 
-            if (isExpired) {
-                localStorage.removeItem('token')
-                set({ user: null, token: null, checkingAuth: false })
+            if (!isExpired) {
+                set({ user: decoded, token, checkingAuth: false })
                 return
             }
-            set({ user: decoded, token, checkingAuth: false })
+
+            if (refreshToken) {
+                try {
+                    const res = await restInstance.post('/auth/refresh', { refreshToken })
+                    const { accessToken } = res.data
+
+                    localStorage.setItem('token', accessToken)
+                    const newDecoded = JSON.parse(atob(accessToken.split('.')[1]))
+                    set({ user: newDecoded, token: accessToken, checkingAuth: false })
+
+                } catch (refreshError) {
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('refreshToken')
+                    set({ user: null, token: null, checkingAuth: false })
+                }
+                return
+            }
+
+            localStorage.removeItem('token')
+            set({ user: null, token: null, checkingAuth: false })
+
         } catch (error) {
             localStorage.removeItem('token')
+            localStorage.removeItem('refreshToken')
             set({ user: null, token: null, checkingAuth: false })
         }
     },
 
     logout: async () => {
         const mutation = `
-            mutation Logout {
-                logout {
+            mutation Logout($refreshToken: String) {
+                logout(refreshToken: $refreshToken) {
                     success
                     message
                 }
             }
         `
-        try {
-            const res = await graphqlInstance.post('', { query: mutation })
-            if (res.data.errors) {
-                toast.error(res.data.errors[0].message)
-                return
-            }
-            localStorage.removeItem('token')
-            set({ user: null, token: null })
-            toast.success("Logged out successfully")
-        } catch (error) {
-            const message = error.errors?.[0]?.message || "Error logging out";
-            toast.error(message)
-        }
 
+        try {
+            const refreshToken = localStorage.getItem('refreshToken')
+
+            const res = await graphqlInstance.post('', {
+                query: mutation,
+                variables: { refreshToken }
+            })
+
+            if (res.data.errors) {
+                throw new Error(res.data.errors[0].message)
+            }
+
+        } catch (error) {
+            console.error('Logout error:', error.message)
+        } finally {
+            localStorage.removeItem('token')
+            localStorage.removeItem('refreshToken')
+            set({ user: null, token: null })
+            toast.success('Logged out successfully')
+        }
     },
 
     googleRedirect: async () => {
         const params = new URLSearchParams(window.location.search)
         const token = params.get('token')
-
+        const refreshToken = params.get('refreshToken')
         if (!token) return
 
         localStorage.setItem('token', token)
+        localStorage.setItem('refreshToken', refreshToken)
 
         const decoded = JSON.parse(atob(token.split('.')[1]))
         set({ user: decoded, token })

@@ -37,7 +37,7 @@ export const useInventoryStore = create((set, get) => ({
                 toast.error(res.data.errors[0].message)
             }
             const { category, total } = res.data.data.getAllCategories
-            console.log(category);
+            //console.log(category);
 
             set({ categories: category, categoryTotal: total, loading: false })
         } catch (error) {
