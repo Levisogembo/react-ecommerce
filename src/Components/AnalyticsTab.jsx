@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { DollarSign, Package, ShoppingCart, Users } from 'lucide-react'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { restInstance } from '../lib/axios'
+import LoadingSpinner from './loadingSpinner'
 const AnalyticsTab = () => {
   const [analyticsData, setAnalyticsData] = useState({
     users: 0,
@@ -36,7 +37,7 @@ const AnalyticsTab = () => {
     fetchAnalytics()
   }, [])
 
-  if (isLoading) return <div>Loading....</div>
+  if (isLoading) return <LoadingSpinner/>
   return (
     <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>

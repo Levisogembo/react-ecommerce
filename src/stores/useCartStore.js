@@ -19,6 +19,7 @@ export const useCartStore = create((set, get) => ({
     checkoutStep: 'idle',
     checkoutRequestId: null,
     orderId: null,
+    orderNumber: null,
     pollingInterval: null,
     paymentError: null,
 
@@ -257,6 +258,7 @@ export const useCartStore = create((set, get) => ({
            mutation CreateNewOrder($orderPayload: createOrderInput!){
                 createNewOrder (orderPayload: $orderPayload){
                     orderId
+                    orderNumber
                     total
                     status
                     mpesaCheckoutRequestId
@@ -295,7 +297,7 @@ export const useCartStore = create((set, get) => ({
             const order = res.data.data.createNewOrder
             //console.log('Order response:', order)  // debug
 
-            const { orderId } = order
+            const { orderId, orderNumber } = order
             //console.log('orderId:', orderId)
             if (!orderId) {
                 set({
@@ -304,7 +306,7 @@ export const useCartStore = create((set, get) => ({
                 })
                 return
             }
-            set({ orderId })
+            set({ orderId, orderNumber })
             //poll for payment status
             get().startPolling(orderId)
         } catch (error) {
@@ -350,7 +352,8 @@ export const useCartStore = create((set, get) => ({
                 if (status === 'success') {
                     clearTimeout(timeout)
                     get().stopPolling()
-                    get().handlePaymentSuccess()
+                    //get().handlePaymentSuccess()
+                    set({checkoutStep: 'success'})
                     return
                 }
 
@@ -389,7 +392,6 @@ export const useCartStore = create((set, get) => ({
             discountAmount: 0,
             total: 0,
             subTotal: 0,
-            checkoutStep: 'success',
             checkoutRequestId: null,
             orderId: null,
             paymentError: null,
@@ -403,7 +405,7 @@ export const useCartStore = create((set, get) => ({
         }
 
         get().calculateTotals()
-        toast.success('Payment confirmed! Your order has been placed.')
+        //toast.success('Payment confirmed! Your order has been placed.')
     },
 
     // payment failed — reset and show error

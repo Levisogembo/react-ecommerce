@@ -35,6 +35,7 @@ export const useInventoryStore = create((set, get) => ({
             const res = await graphqlInstance.post('', { query, variables })
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
+                return
             }
             const { category, total } = res.data.data.getAllCategories
             //console.log(category);

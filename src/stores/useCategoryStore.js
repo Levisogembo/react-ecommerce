@@ -1,11 +1,15 @@
 import { create } from "zustand";
-import { restInstance } from "../lib/axios";
+import { graphqlInstance, restInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
 export const useCategoryStore = create((set, get) => ({
     categoryProducts: [],
     loading: false,
     featuredProducts: [],
+    page: 1,
+    limit: 10,
+    orders: [],
+    total: 0,
 
     getProductsByCategory: async (categoryName) => {
         set({ loading: false })
@@ -64,6 +68,42 @@ export const useCategoryStore = create((set, get) => ({
                 error?.message ||
                 "Error creating coupon"
 
+            toast.error(message)
+        }
+    },
+
+    getAllOrders: async (page, limit) => {
+        set({ loading: true, page })
+        const query = `
+            query GetAllOrders ($page: Int!, $limit: Int! ) {
+                getAllOrders (page: $page, limit: $limit) {
+                    orders {
+                        orderId
+                        orderNumber
+                        paymentMethod
+                        createdAt
+                        paidAt
+                        status
+                        total
+                        isRefunded
+                    }
+                    total
+                }
+            }
+        `
+        const variables = { page, limit}
+        try {
+            const res = await graphqlInstance.post('', { query, variables })
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            const { orders, total } = res.data.data.getAllOrders
+
+            set({ loading: false, orders, total })
+        } catch (error) {
+            set({ loading: false })
+            const message = error.message || "Error fetching products"
             toast.error(message)
         }
     }

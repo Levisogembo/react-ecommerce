@@ -18,6 +18,7 @@ import PublicLayout from "./layouts/PublicLayout"
 import GuestRoute from "./layouts/GuestRoute"
 import AppLayout from "./layouts/AppLayout"
 import ProtectedRoute from "./Components/ProtectedRoute"
+import PurchaseSuccessPage from "./Pages/PurchaseSuccess"
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -73,6 +74,7 @@ function App() {
           {/* PROTECTED ROUTES*/}
           <Route element={<ProtectedRoute />}>
             <Route path='/cart' element={<CartPage />} />
+            <Route path='/checkout/success' element={<PurchaseSuccessPage />} />
           </Route>
 
           {/* ADMIN ROUTES*/}

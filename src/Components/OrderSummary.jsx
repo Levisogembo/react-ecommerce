@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MoveRight, Smartphone, CreditCard, ArrowLeft, Loader, CheckCircle, XCircle } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCartStore } from '../stores/useCartStore'
 
 const OrderSummary = () => {
@@ -51,6 +51,12 @@ const OrderSummary = () => {
 	const handleMpesaPayment = () => {
 		initiateMpesaPayment({ phone, query })
 	}
+	const navigate = useNavigate()
+	useEffect(()=>{
+		if(checkoutStep === 'success'){
+			navigate('/checkout/success')
+		}
+	},[checkoutStep])
 
 	return (
 		<motion.div
@@ -322,7 +328,7 @@ const OrderSummary = () => {
 				)}
 
 				{/* step 5 — success */}
-				{checkoutStep === 'success' && (
+				{/* {checkoutStep === 'success' && (
 					<motion.div
 						key='success'
 						initial={{ opacity: 0, scale: 0.95 }}
@@ -358,7 +364,7 @@ const OrderSummary = () => {
 							<MoveRight size={16} />
 						</Link>
 					</motion.div>
-				)}
+				)} */}
 
 				{/* step 6 — failed */}
 				{checkoutStep === 'failed' && (
