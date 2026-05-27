@@ -390,6 +390,7 @@ export const useCartStore = create((set, get) => ({
             coupon: null,
             isCouponApplied: false,
             discountAmount: 0,
+            checkoutStep: 'idle',
             total: 0,
             subTotal: 0,
             checkoutRequestId: null,
