@@ -9,12 +9,13 @@ import CategoriesTab from '../Components/CategoriesTab'
 import CreateCategoryForm from './createCategoryForm'
 import CategoriesList from './CategoriesList'
 import CreateCouponForm from './CreateCouponForm'
+import ViewCoupons from './ViewCoupons'
 
 const tabs = [
     { id: "create", label: "Create Category", icon: PlusCircle },
     { id: "list", label: "Categories", icon: Grid },
     { id: "coupon", label: "Create Coupons", icon: Ticket },
-    { id: "viewCoupon", label: "View Coupons", icon: BadgePercent },
+    { id: "couponList", label: "View Coupons", icon: BadgePercent },
 ]
 
 const AdminPage = () => {
@@ -54,7 +55,7 @@ const AdminPage = () => {
           {activeTab === "create" && <CreateCategoryForm />}
           {activeTab === "list" && <CategoriesList />}
           {activeTab === "coupon" && <CreateCouponForm />}
-          {activeTab === "list" && <CategoriesList />}
+          {activeTab === "couponList" && <ViewCoupons />}
         </div>
       </div>
     )

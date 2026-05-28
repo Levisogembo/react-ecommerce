@@ -8,6 +8,7 @@ import { useInventoryStore } from '../stores/useInventoryStore'
 import CategoriesTab from '../Components/CategoriesTab'
 import Orders from '../Components/Orders'
 import { useCategoryStore } from '../stores/useCategoryStore'
+import { useCartStore } from '../stores/useCartStore'
 
 const tabs = [
     { id: "create", label: "Create Product", icon: PlusCircle },
@@ -21,11 +22,13 @@ const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('create')
     const {fetchAllProducts, page, limit} = useInventoryStore()
     const {getAllOrders} = useCategoryStore()
+    const {getAllCoupons} = useCartStore()
 
     useEffect(()=>{
         fetchAllProducts(page,limit)
         getAllOrders(page,limit)
-    },[fetchAllProducts])
+        getAllCoupons(page,limit)
+    },[fetchAllProducts,getAllOrders,getAllCoupons])
     
     return (
         <div className='min-h-screen relative overflow-hidden'>

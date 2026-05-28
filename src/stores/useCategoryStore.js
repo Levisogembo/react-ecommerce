@@ -31,6 +31,12 @@ export const useCategoryStore = create((set, get) => ({
     createCoupon: async (newCoupon) => {
         set({ loading: true })
         try {
+            if (newCoupon.discountType && newCoupon.discountType !== 'fixed' && newCoupon.discountValue) {
+                if (newCoupon.discountValue > 100) {
+                    toast.error("Coupon discount percentage cannot be more than 100%")
+                    return
+                }
+            }
             const res = await restInstance.post('/coupon/create', newCoupon)
             if (res.data.errors) {
                 toast.error(res.data.errors[0].message)
@@ -82,16 +88,24 @@ export const useCategoryStore = create((set, get) => ({
                         orderNumber
                         paymentMethod
                         createdAt
+                        billingAddress
+                        mpesaCheckoutRequestId
+                        transactionId
                         paidAt
                         status
                         total
                         isRefunded
+                        user {
+                            userId
+                            firstName
+                            lastName
+                        }
                     }
                     total
                 }
             }
         `
-        const variables = { page, limit}
+        const variables = { page, limit }
         try {
             const res = await graphqlInstance.post('', { query, variables })
             if (res.data.errors) {

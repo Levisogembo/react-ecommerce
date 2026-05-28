@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { graphqlInstance, restInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-
+import dayjs from 'dayjs';
 
 export const useCartStore = create((set, get) => ({
     cart: [],
@@ -12,6 +12,10 @@ export const useCartStore = create((set, get) => ({
     coupon: null,
     personalCoupon: null,
     publicCoupons: [],
+    allCoupons: [],
+    page: 1,
+    limit: 10,
+    total: 0,
     validating: false,
     discountAmount: 0,
     isCouponApplied: false,
@@ -353,7 +357,7 @@ export const useCartStore = create((set, get) => ({
                     clearTimeout(timeout)
                     get().stopPolling()
                     //get().handlePaymentSuccess()
-                    set({checkoutStep: 'success'})
+                    set({ checkoutStep: 'success' })
                     return
                 }
 
@@ -402,6 +406,7 @@ export const useCartStore = create((set, get) => ({
         try {
             await restInstance.delete('/cart/clear')
         } catch (error) {
+            set({ checkoutStep: 'idle' })
             console.error('Failed to clear cart on backend:', error.message)
         }
 
@@ -459,5 +464,112 @@ export const useCartStore = create((set, get) => ({
 
         // invalid
         return null
+    },
+
+    getAllCoupons: async (page, limit) => {
+        set({ loading: true, page })
+        try {
+            const res = await restInstance.get(`/coupon/all?page=${page}&limit=${limit}`)
+            if (res.data.errors) {
+                set({ loading: false })
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            const { coupons, total } = res.data
+            set({ loading: false, allCoupons: coupons, total })
+        } catch (error) {
+            set({ loading: false, allCoupons: [], total: 0 })
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Error creating coupon"
+
+            toast.error(message)
+        }
+    },
+
+    toggleActiveCoupon: async (couponId) => {
+        set({ loading: true })
+        let states
+        set((state) => ({
+            states: state,
+
+            allCoupons: state.allCoupons.map((coupon) =>
+                coupon.couponId === couponId
+                    ? { ...coupon, isActive: !coupon.isActive }
+                    : coupon
+            ),
+        }))
+        console.log(states)
+
+        try {
+            const res = await restInstance.patch(`/coupon/activate/${couponId}`)
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+            set({ loading: false })
+            toast.success('Coupon status activated successfully')
+        } catch (error) {
+            set({ loading: false, allCoupons: [], total: 0 })
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Error creating coupon"
+
+            toast.error(message)
+        }
+
+    },
+
+    editCoupon: async (couponId, payload) => {
+        set({ loading: true })
+        try {
+            if (payload.expirationDate) {
+                const isBeforeToday = dayjs(payload.expirationDate).isBefore(dayjs().startOf('day'))
+                if (isBeforeToday) {
+                    toast.error("Coupon expiration date cannot be a date before today")
+                    return
+                }
+            }
+            if (payload.discountType && payload.discountType !== 'fixed' && payload.discountValue) {
+                if (payload.discountValue > 100) {
+                    toast.error("Coupon discount percentage cannot be more than 100%")
+                    return
+                }
+            }
+            const cleanedPayload = Object.fromEntries(
+                Object.entries(payload).filter(([_, value]) => {
+                    return (
+                        value !== undefined &&
+                        value !== null &&
+                        value !== ''
+                    );
+                })
+            );
+
+            const res = await restInstance.patch(`/coupon/update/${couponId}`, cleanedPayload)
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+            }
+            set((previousState) => ({
+                allCoupons: previousState.allCoupons.map((coupon) =>
+                    coupon.couponId === res.data.couponId ? res.data : coupon
+                ),
+            }))
+            toast.success('Product updated successfully')
+            set({ loading: false })
+
+        } catch (error) {
+            set({ loading: false })
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Error creating coupon"
+
+            toast.error(message)
+        }
     }
 }))

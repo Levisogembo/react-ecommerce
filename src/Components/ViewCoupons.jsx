@@ -3,30 +3,30 @@ import { motion } from 'framer-motion'
 import { Edit, Star, Trash, ChevronLeft, ChevronRight } from 'lucide-react'
 import EditProductModal from '../Modals/EditProductModal'
 import DeleteProductModal from '../Modals/DeleteProductModal'
-import { useCategoryStore } from '../stores/useCategoryStore'
-import EditOrderModal from '../Modals/EditOrderModal'
+import { useCartStore } from '../stores/useCartStore'
+import EditCouponModal from '../Modals/EditCouponModal'
 
-const Orders = () => {
-    const { getAllOrders, orders, page, limit, total, loading } = useCategoryStore()
+const ViewCoupons = () => {
+    const { deleteProduct, toggleActiveCoupon, allCoupons, page, limit, total, loading } = useCartStore()
     //console.log(products[0]);
-    const [editingOrder, setEditingOrder] = useState(null)
-    const [deletingProduct, setDeletingProduct] = useState(null)    
+    const [editingCoupon, setEditingCoupon] = useState(null)
+    const [deletingCoupon, setDeletingCoupon] = useState(null)
     
     const totalPages = Math.ceil(total / limit)
     const handlePreviousPage = async () => {
         if (page > 1) {
-            await getAllOrders(page - 1, limit)
+            await getAllCoupons(page - 1, limit)
         }
     }
 
     const handleNextPage = async () => {
         if (page < totalPages) {
-            await getAllOrders(page + 1, limit)
+            await getAllCoupons(page + 1, limit)
         }
     }
 
     const handlePageClick = async (page) => {
-        await getAllOrders(page, limit)
+        await getAllCoupons(page, limit)
     }
 
     const getPaginationRange = (currentPage, totalPages) => {
@@ -74,113 +74,131 @@ const Orders = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}>
-
-            <div className='overflow-x-auto rounded-lg border border-gray-700'>
+            <div className='overflow-x-auto'>
                 <table className='min-w-full divide-y divide-gray-700'>
                     <thead className='bg-gray-700'>
                         <tr>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
-                                Order Id
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Coupon
                             </th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
-                                Created At
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Discount Type
                             </th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
-                                Status
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Discount Value
                             </th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
-                                Payment Method
+
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Expiration Date
                             </th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
-                                Paid At
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Maximum Uses
                             </th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
-                                Total
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Current Uses
                             </th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap'>
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Minimum Order Amount
+                            </th>
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
+                                Is Active
+                            </th>
+                            <th
+                                scope='col'
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider'
+                            >
                                 Actions
                             </th>
                         </tr>
                     </thead>
                     <tbody className='bg-gray-800 divide-y divide-gray-700'>
-                        {orders?.map((order) => (
-                            <tr key={order.orderId} className='hover:bg-gray-700'>
+                        {allCoupons?.map((coupon) => (
+                            //console.log(`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`),
 
-                                {/* truncate long order ID */}
+                            <tr key={coupon.couponId} className='hover:bg-gray-700'>
                                 <td className='px-6 py-4 whitespace-nowrap'>
-                                    <div className='text-sm text-gray-300 font-mono'>
-                                        {order.orderNumber ? order.orderNumber : `${order.orderId.substring(0, 8)}...`}
-                                    </div>
+                                    <div className='text-sm text-gray-300'>{coupon.code}</div>
                                 </td>
-
                                 <td className='px-6 py-4 whitespace-nowrap'>
-                                    <div className='text-sm text-gray-300'>
-                                        {new Date(order.createdAt).toLocaleDateString('en-KE', {
-                                            day: 'numeric',
-                                            month: 'short',
-                                            year: 'numeric'
-                                        })}
-                                    </div>
+                                    <div className='text-sm text-gray-300'>{coupon.discountType}</div>
                                 </td>
-
-                                {/* status badge */}
                                 <td className='px-6 py-4 whitespace-nowrap'>
-                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${order.status === 'COMPLETED'
-                                            ? 'bg-emerald-900 text-emerald-300'
-                                            : order.status === 'PENDING_PAYMENT'
-                                                ? 'bg-yellow-900 text-yellow-300'
-                                                : order.status === 'PAYMENT_FAILED'
-                                                    ? 'bg-red-900 text-red-300'
-                                                    : order.status === 'PROCESSING'
-                                                        ? 'bg-blue-900 text-blue-300'
-                                                        : 'bg-gray-700 text-gray-300'
-                                        }`}>
-                                        {order.status}
-                                    </span>
+                                    <div className='text-sm text-gray-300'>{coupon.discountType === 'fixed' ?
+                                        `Kes ${coupon.discountValue}` : `%${coupon.discountValue}`}</div>
                                 </td>
-
                                 <td className='px-6 py-4 whitespace-nowrap'>
-                                    <div className='text-sm text-gray-300'>
-                                        {order.paymentMethod}
-                                    </div>
+                                    <div className='text-sm text-gray-300'>{new Date(coupon.expirationDate).toLocaleDateString('en-KE', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    })}</div>
                                 </td>
-
                                 <td className='px-6 py-4 whitespace-nowrap'>
-                                    <div className='text-sm text-gray-300'>
-                                        {order.paidAt
-                                            ? new Date(order.paidAt).toLocaleDateString('en-KE', {
-                                                day: 'numeric',
-                                                month: 'short',
-                                                year: 'numeric'
-                                            })
-                                            : '—'
-                                        }
-                                    </div>
+                                    <div className='text-sm text-gray-300'>{coupon.maxUses || '-'}</div>
                                 </td>
-
                                 <td className='px-6 py-4 whitespace-nowrap'>
-                                    <div className='text-sm text-gray-300'>
-                                        Ksh {order.total?.toLocaleString()}
-                                    </div>
+                                    <div className='text-sm text-gray-300'>{coupon.currentUses || '-'}</div>
                                 </td>
-
+                                <td className='px-6 py-4 whitespace-nowrap'>
+                                    <div className='text-sm text-gray-300'>{coupon.minOrderAmount && `Kes ${coupon.minOrderAmount}` || '-'}</div>
+                                </td>
+                                {<td className='px-6 py-4 whitespace-nowrap'>
+                                    <button
+                                        onClick={() => toggleActiveCoupon(coupon.couponId)}
+                                        className={`p-1 rounded-full ${coupon.isActive ? "bg-yellow-400 text-gray-900" : "bg-gray-600 text-gray-300"
+                                            } hover:bg-yellow-500 transition-colors duration-200`}
+                                    >
+                                        <Star className='h-5 w-5' />
+                                    </button>
+                                </td>}
                                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
                                     <div className='flex items-center gap-3'>
-                                        <button className='text-emerald-400 hover:text-emerald-300 text-xs'
-                                         onClick={()=> setEditingOrder(order)}   
+                                        <button
+                                            onClick={() => setDeletingCoupon(coupon)}
+                                            className='text-red-400 hover:text-red-300'
                                         >
-                                            View
+                                            <Trash className='h-5 w-5' />
+                                        </button>
+
+                                        <button
+                                            onClick={() => setEditingCoupon(coupon)}
+                                            className='text-green-300 hover:text-green-400'
+                                        >
+                                            <Edit className='h-5 w-5' />
                                         </button>
                                     </div>
                                 </td>
-
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            {editingOrder && <EditOrderModal order={editingOrder}  onClose={() => setEditingOrder(null)} />}
-            {deletingProduct && <DeleteProductModal product={deletingProduct} onClose={() => setDeletingProduct(null)} onConfirm={() => {
+            {editingCoupon && <EditCouponModal coupon={editingCoupon} onClose={() => setEditingCoupon(null)} />}
+            {deletingCoupon && <DeleteProductModal product={deletingProduct} onClose={() => setDeletingProduct(null)} onConfirm={() => {
                 deleteProduct(deletingProduct.productId)
                 setDeletingProduct(null)
             }} />}
@@ -258,4 +276,4 @@ const Orders = () => {
     )
 }
 
-export default Orders
+export default ViewCoupons
