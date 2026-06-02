@@ -6,7 +6,7 @@ import { useCartStore } from '../stores/useCartStore'
 
 const EditCouponModal = ({ coupon, onClose }) => {
     const [formData, setFormData] = useState({
-        code: coupon.code || '',
+        code: '',
         discountType: coupon.discountType || '',
         discountValue: coupon.discountValue || '',
         expirationDate: coupon.expirationDate || '',

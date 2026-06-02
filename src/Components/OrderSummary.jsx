@@ -43,7 +43,8 @@ const OrderSummary = () => {
 		cancelCheckout,
 		backToSelection,
 	} = useCartStore()
-
+	//console.log(coupon);
+	
 	const formattedSubtotal = subTotal.toFixed(2)
 	const formattedTotal = total.toFixed(2)
 	const savings = subTotal - total

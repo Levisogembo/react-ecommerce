@@ -533,11 +533,9 @@ export const useCartStore = create((set, get) => ({
                     return
                 }
             }
-            if (payload.discountType && payload.discountType !== 'fixed' && payload.discountValue) {
-                if (payload.discountValue > 100) {
-                    toast.error("Coupon discount percentage cannot be more than 100%")
-                    return
-                }
+            if (payload.discountType && payload.discountType !== 'fixed' && payload.discountValue && payload.discountValue > 100) {
+                toast.error("Coupon discount percentage cannot be more than 100%")
+                return
             }
             const cleanedPayload = Object.fromEntries(
                 Object.entries(payload).filter(([_, value]) => {
@@ -558,7 +556,7 @@ export const useCartStore = create((set, get) => ({
                     coupon.couponId === res.data.couponId ? res.data : coupon
                 ),
             }))
-            toast.success('Product updated successfully')
+            toast.success('Coupon updated successfully')
             set({ loading: false })
 
         } catch (error) {
@@ -571,5 +569,31 @@ export const useCartStore = create((set, get) => ({
 
             toast.error(message)
         }
-    }
+    },
+
+    deleteCoupon: async (couponId) => {
+        set({ loading: true })
+        try {
+            const res = await restInstance.delete(`/coupon/delete/${couponId}`)
+            if (res.data.errors) {
+                toast.error(res.data.errors[0].message)
+                return
+            }
+            set((previousState) => {
+                const newCoupons = previousState.allCoupons.filter((item) => item.couponId !== couponId)
+                return { allCoupons: newCoupons }
+            })
+            toast.success("Coupon deleted successfully")
+            set({ loading: false })
+        } catch (error) {
+            set({ loading: false })
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data?.error ||
+                error?.message ||
+                "Error creating coupon"
+
+            toast.error(message)
+        }
+    },
 }))

@@ -5,9 +5,10 @@ import EditProductModal from '../Modals/EditProductModal'
 import DeleteProductModal from '../Modals/DeleteProductModal'
 import { useCartStore } from '../stores/useCartStore'
 import EditCouponModal from '../Modals/EditCouponModal'
+import DeleteCouponModal from '../Modals/DeleteCouponModal'
 
 const ViewCoupons = () => {
-    const { deleteProduct, toggleActiveCoupon, allCoupons, page, limit, total, loading } = useCartStore()
+    const { deleteCoupon, toggleActiveCoupon, allCoupons, page, limit, total, loading } = useCartStore()
     //console.log(products[0]);
     const [editingCoupon, setEditingCoupon] = useState(null)
     const [deletingCoupon, setDeletingCoupon] = useState(null)
@@ -198,9 +199,9 @@ const ViewCoupons = () => {
                 </table>
             </div>
             {editingCoupon && <EditCouponModal coupon={editingCoupon} onClose={() => setEditingCoupon(null)} />}
-            {deletingCoupon && <DeleteProductModal product={deletingProduct} onClose={() => setDeletingProduct(null)} onConfirm={() => {
-                deleteProduct(deletingProduct.productId)
-                setDeletingProduct(null)
+            {deletingCoupon && <DeleteCouponModal coupon={deletingCoupon} onClose={() => setDeletingCoupon(null)} onConfirm={() => {
+                deleteCoupon(deletingCoupon.couponId)
+                setDeletingCoupon(null)
             }} />}
             {/* pagination controls */}
             <div className='flex items-center justify-between px-6 py-4 border-t border-gray-700'>
