@@ -8,7 +8,7 @@ import EditCouponModal from '../Modals/EditCouponModal'
 import DeleteCouponModal from '../Modals/DeleteCouponModal'
 
 const ViewCoupons = () => {
-    const { deleteCoupon, toggleActiveCoupon, allCoupons, page, limit, total, loading } = useCartStore()
+    const { deleteCoupon, toggleActiveCoupon, allCoupons, page, limit, total, loading, subtotal } = useCartStore()
     //console.log(products[0]);
     const [editingCoupon, setEditingCoupon] = useState(null)
     const [deletingCoupon, setDeletingCoupon] = useState(null)

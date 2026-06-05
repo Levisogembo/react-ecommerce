@@ -7,7 +7,6 @@ export const useCartStore = create((set, get) => ({
     cart: [],
     coupon: null,
     loading: false,
-    total: 0,
     subTotal: 0,
     coupon: null,
     personalCoupon: null,
@@ -16,6 +15,7 @@ export const useCartStore = create((set, get) => ({
     page: 1,
     limit: 10,
     total: 0,
+    totalCoupons: 0,
     validating: false,
     discountAmount: 0,
     isCouponApplied: false,
@@ -123,15 +123,26 @@ export const useCartStore = create((set, get) => ({
 
     calculateTotals: () => {
         const { cart, coupon } = get()
+        
         const subTotal = cart.reduce((sum, item) => {
-            return sum += item.unitPrice * item.quantity
+            return sum + item.unitPrice * item.quantity
         }, 0)
+
         let total = subTotal
-        if (coupon) {
-            const discount = subTotal * (coupon.discountPercentage / 100)
-            total = subTotal - discount
+        let discountAmount = 0
+        
+        if (coupon && get().isCouponApplied) {
+            if (coupon.discountType === 'percentage') {
+                discountAmount = Math.round((coupon.discountValue / 100) * subTotal)
+
+            } else if (coupon.discountType === 'fixed') {
+                discountAmount = Math.min(coupon.discountValue, subTotal)
+            }
+
+            total = Math.max(0, subTotal - discountAmount)  // never go below 0
         }
-        set({ total, subTotal })
+       
+        set({ total, subTotal, discountAmount })
     },
 
     getRecommendations: async () => {
@@ -202,15 +213,15 @@ export const useCartStore = create((set, get) => ({
                     code: validatedCode,
                     discountType,
                     discountValue,
-                    discountPercentage: discountType === 'percentage' ? discountValue : 0,
+                    discountPercentage:
+                        discountType === 'percentage'
+                            ? discountValue
+                            : 0,
                 },
                 isCouponApplied: true,
-                discountAmount,
-                total: finalAmount,
                 validating: false
             })
 
-            // recalculate totals with the new coupon
             get().calculateTotals()
 
             toast.success(`Coupon "${validatedCode}" applied successfully`)
@@ -476,9 +487,9 @@ export const useCartStore = create((set, get) => ({
                 return
             }
             const { coupons, total } = res.data
-            set({ loading: false, allCoupons: coupons, total })
+            set({ loading: false, allCoupons: coupons, totalCoupons: total })
         } catch (error) {
-            set({ loading: false, allCoupons: [], total: 0 })
+            set({ loading: false, allCoupons: [], totalCoupons: 0 })
             const message =
                 error?.response?.data?.message ||
                 error?.response?.data?.error ||
@@ -491,17 +502,13 @@ export const useCartStore = create((set, get) => ({
 
     toggleActiveCoupon: async (couponId) => {
         set({ loading: true })
-        let states
         set((state) => ({
-            states: state,
-
             allCoupons: state.allCoupons.map((coupon) =>
                 coupon.couponId === couponId
                     ? { ...coupon, isActive: !coupon.isActive }
                     : coupon
             ),
         }))
-        console.log(states)
 
         try {
             const res = await restInstance.patch(`/coupon/activate/${couponId}`)
@@ -511,7 +518,7 @@ export const useCartStore = create((set, get) => ({
             set({ loading: false })
             toast.success('Coupon status activated successfully')
         } catch (error) {
-            set({ loading: false, allCoupons: [], total: 0 })
+            set({ loading: false})
             const message =
                 error?.response?.data?.message ||
                 error?.response?.data?.error ||

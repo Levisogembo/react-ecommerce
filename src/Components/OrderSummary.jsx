@@ -43,7 +43,7 @@ const OrderSummary = () => {
 		cancelCheckout,
 		backToSelection,
 	} = useCartStore()
-	//console.log(coupon);
+	
 	
 	const formattedSubtotal = subTotal.toFixed(2)
 	const formattedTotal = total.toFixed(2)
@@ -88,7 +88,7 @@ const OrderSummary = () => {
 							Coupon ({coupon.code})
 						</dt>
 						<dd className='text-base font-medium text-emerald-400'>
-							-{coupon.discountPercentage}%
+							-{coupon.discountType === 'fixed' ? `Kes ${coupon.discountValue}` : `${coupon.discountPercentage}%`}
 						</dd>
 					</dl>
 				)}
