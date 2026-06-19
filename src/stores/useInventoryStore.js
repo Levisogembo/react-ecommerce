@@ -7,6 +7,7 @@ export const useInventoryStore = create((set, get) => ({
     categories: [],
     categoryOptions: [],
     loading: false,
+    categoryLoading: false,
     products: [],
     page: 1,
     categoryPage: 1,
@@ -16,7 +17,7 @@ export const useInventoryStore = create((set, get) => ({
     categoryTotal: 0,
 
     fetchCategories: async (categoryPage, categoryLimit) => {
-        set({ loading: true, categoryPage })
+        set({ categoryLoading: true, categoryPage })
 
         const query = `
             query GetAllCategories ($page: Float!, $limit: Float!) {
@@ -40,9 +41,9 @@ export const useInventoryStore = create((set, get) => ({
             const { category, total } = res.data.data.getAllCategories
             //console.log(category);
 
-            set({ categories: category, categoryTotal: total, loading: false })
+            set({ categories: category, categoryTotal: total, categoryLoading: false })
         } catch (error) {
-            set({ loading: false })
+            set({ categoryLoading: false })
             const message = error.errors?.[0]?.message || "Error in fetching categories ";
             toast.error(message)
         }
@@ -166,7 +167,7 @@ export const useInventoryStore = create((set, get) => ({
     },
 
     deleteCategory: async (categoryId) => {
-        set({ loading: true })
+        set({ categoryLoading: true })
         const mutation = `
             mutation DeleteCategory($categoryId: String!){
                 deleteCategory(categoryId: $categoryId)
@@ -184,7 +185,7 @@ export const useInventoryStore = create((set, get) => ({
                 categories: previousState.categories.filter((category) => category.categoryId !== categoryId)
             }))
             toast.success('Category deleted successfully')
-            set({ loading: false })
+            set({ categoryLoading: false })
         } catch (error) {
             set({ loading: false })
             const message = error.message || "Error updating category"
@@ -229,12 +230,12 @@ export const useInventoryStore = create((set, get) => ({
 
     },
 
-    fetchAllProducts: async (page, limit) => {
+    fetchAllProducts: async (page, limit, searchOptions) => {
         set({ loading: true, page })
 
         const query = `
-            query GetManyProduct($page: Float!, $limit: Float!) {
-            getManyProducts(page: $page, limit: $limit) {
+            query GetManyProduct($page: Int!, $limit: Int!, $searchOptions: searchOptionsInput) {
+            getManyProducts(page: $page, limit: $limit, searchOptions: $searchOptions) {
                 products {
                     productId
                     name
@@ -259,7 +260,10 @@ export const useInventoryStore = create((set, get) => ({
             }
         }
     `
-        const variables = { page, limit }
+        const variables = { page, limit, searchOptions: searchOptions || {
+            productName: "",
+            categoryName: ""
+        }}
 
         try {
             const res = await graphqlInstance.post('', { query, variables })
@@ -280,7 +284,7 @@ export const useInventoryStore = create((set, get) => ({
     },
 
     createCategory: async ({ name, description }) => {
-        set({ loading: true })
+        set({ categoryLoading: true })
         const query = `
             mutation CreateCategory($categoryInput: createCategoryInput!){
                 createCategory(categoryInput: $categoryInput){
@@ -304,17 +308,17 @@ export const useInventoryStore = create((set, get) => ({
                 categories: [...previousState.categories, res.data.data.createCategory],
                 categoryOptions: [...previousState.categoryOptions, res.data.data.createCategory],
             }))
-            set({ loading: false })
+            set({ categoryLoading: false })
             toast.success('Category created successfully')
         } catch (error) {
-            set({ loading: false })
+            set({ categoryLoading: false })
             const message = error.message || "Error fetching categories"
             toast.error(message)
         }
     },
 
     updateCategory: async (categoryId, updatePayload) => {
-        set({ loading: true })
+        set({ categoryLoading: true })
         const mutation = `
             mutation UpdateCategory ($categoryId: String!, $updateCategoryInput: updateCategoryInput!){
                 updateCategory (categoryId: $categoryId, updateCategoryInput: $updateCategoryInput){
@@ -359,10 +363,10 @@ export const useInventoryStore = create((set, get) => ({
                     cat.categoryId === categoryId ? updatedCategory : cat
                 )
             }))
-            set({ loading: false })
+            set({ categoryLoading: false })
             toast.success('Category updated successfully')
         } catch (error) {
-            set({ loading: false })
+            set({ categoryLoading: false })
             const message = error.message || "Error fetching categories"
             toast.error(message)
         }

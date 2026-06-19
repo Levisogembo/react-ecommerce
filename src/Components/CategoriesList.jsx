@@ -8,7 +8,7 @@ import DeleteCategoryModal from '../Modals/DeleteCategoryModal'
 import EditCategoryModal from '../Modals/EditCategoryModal'
 
 const CategoriesList = () => {
-    const { deleteCategory, categoryPage, categoryLimit, categoryTotal, fetchCategories, loading, categories } = useInventoryStore()
+    const { deleteCategory, categoryPage, categoryLimit, categoryTotal, fetchCategories, categoryLoading, categories } = useInventoryStore()
     //console.log(products[0]);
     const [editingCategory, setEditingCategory] = useState(null)
     const [deletingCategory, setDeletingCategory] = useState(null)
@@ -149,7 +149,7 @@ const CategoriesList = () => {
                     {/* prev button */}
                     <button
                         onClick={handlePreviousPage}
-                        disabled={categoryPage === 1 || loading}
+                        disabled={categoryPage === 1 || categoryLoading}
                         className='p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 
         disabled:opacity-50 disabled:cursor-not-allowed'
                     >
@@ -198,7 +198,7 @@ const CategoriesList = () => {
                     {/* next button */}
                     <button
                         onClick={handleNextPage}
-                        disabled={categoryPage === totalPages || loading}
+                        disabled={categoryPage === totalPages || categoryLoading}
                         className='p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 
         disabled:opacity-50 disabled:cursor-not-allowed'
                     >
