@@ -16,7 +16,7 @@ const ProductList = () => {
     fetchAllProducts,
     loading,
     categories,
-    categoryOptions
+    categoryOptions,
   } = useInventoryStore();
   //console.log(products[0]);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -26,7 +26,7 @@ const ProductList = () => {
     categoryName: "",
   });
   console.log(products);
-  
+
   const totalPages = Math.ceil(total / limit);
   const handlePreviousPage = async () => {
     if (page > 1) {
@@ -91,7 +91,7 @@ const ProductList = () => {
     return () => clearTimeout(timer);
   }, [searchOptions, page, limit]);
   //console.log(categoryOptions);
-  
+
   return (
     <motion.div
       className="bg-gray-800 shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto"
@@ -244,90 +244,98 @@ const ProductList = () => {
             </tr>
           </thead>
           <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {products?.map((product) => (
-              //console.log(`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`),
+            {products.length > 0 ? (
+              products?.map((product) => (
+                //console.log(`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`),
 
-              <tr key={product.productId} className="hover:bg-gray-700">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      {product.images?.length > 0 ? (
-                        <img
-                          className="h-10 w-10 rounded-full object-cover"
-                          src={`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`}
-                          alt={product.name}
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
-                          <span className="text-xs text-gray-400">N/A</span>
+                <tr key={product.productId} className="hover:bg-gray-700">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {product.images?.length > 0 ? (
+                          <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`}
+                            alt={product.name}
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
+                            <span className="text-xs text-gray-400">N/A</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-white">
+                          {product.name}
                         </div>
-                      )}
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-white">
-                        {product.name}
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">
-                    Ksh {product.price}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">
-                    {product.category?.name ?? "Uncategorized"}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">
-                    {product.quantity}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">
-                    {product.quantity - product.reservedQuantity}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-300">
-                    {product.soldQuantity}
-                  </div>
-                </td>
-                {
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => toggleFeaturedProduct(product.productId)}
-                      className={`p-1 rounded-full ${
-                        product.isFeatured
-                          ? "bg-yellow-400 text-gray-900"
-                          : "bg-gray-600 text-gray-300"
-                      } hover:bg-yellow-500 transition-colors duration-200`}
-                    >
-                      <Star className="h-5 w-5" />
-                    </button>
                   </td>
-                }
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setDeletingProduct(product)}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      <Trash className="h-5 w-5" />
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-300">
+                      Ksh {product.price}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-300">
+                      {product.category?.name ?? "Uncategorized"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-300">
+                      {product.quantity}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-300">
+                      {product.quantity - product.reservedQuantity}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-300">
+                      {product.soldQuantity}
+                    </div>
+                  </td>
+                  {
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => toggleFeaturedProduct(product.productId)}
+                        className={`p-1 rounded-full ${
+                          product.isFeatured
+                            ? "bg-yellow-400 text-gray-900"
+                            : "bg-gray-600 text-gray-300"
+                        } hover:bg-yellow-500 transition-colors duration-200`}
+                      >
+                        <Star className="h-5 w-5" />
+                      </button>
+                    </td>
+                  }
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setDeletingProduct(product)}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <Trash className="h-5 w-5" />
+                      </button>
 
-                    <button
-                      onClick={() => setEditingProduct(product)}
-                      className="text-green-300 hover:text-green-400"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => setEditingProduct(product)}
+                        className="text-green-300 hover:text-green-400"
+                      >
+                        <Edit className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="px-6 py-12 text-center">
+                  <div className="text-gray-400 text-sm">No products found</div>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

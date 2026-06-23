@@ -20,7 +20,7 @@ const CreateProductForm = () => {
   })
 
   const { loading, categoryOptions, fetchCategoryOptions, createProduct } = useInventoryStore()
-  console.log(categoryOptions);
+  //console.log(categoryOptions);
   
   useEffect(() => {
     if (categoryOptions.length === 0) {

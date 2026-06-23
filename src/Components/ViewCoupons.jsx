@@ -137,7 +137,7 @@ const ViewCoupons = () => {
                         </tr>
                     </thead>
                     <tbody className='bg-gray-800 divide-y divide-gray-700'>
-                        {allCoupons?.map((coupon) => (
+                        {allCoupons.length > 0 ? (allCoupons?.map((coupon) => (
                             //console.log(`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`),
 
                             <tr key={coupon.couponId} className='hover:bg-gray-700'>
@@ -194,7 +194,13 @@ const ViewCoupons = () => {
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                        ))): (
+                            <tr>
+                              <td colSpan={7} className="px-6 py-12 text-center">
+                                <div className="text-gray-400 text-sm">No coupons found</div>
+                              </td>
+                            </tr>
+                          )}
                     </tbody>
                 </table>
             </div>
