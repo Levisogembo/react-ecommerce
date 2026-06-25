@@ -25,7 +25,7 @@ const ProductList = () => {
     productName: "",
     categoryName: "",
   });
-  console.log(products);
+  //console.log(products);
 
   const totalPages = Math.ceil(total / limit);
   const handlePreviousPage = async () => {
@@ -288,7 +288,7 @@ const ProductList = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-300">
-                      {product.quantity - product.reservedQuantity}
+                      {product.quantity - product.soldQuantity}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -342,7 +342,7 @@ const ProductList = () => {
       {editingProduct && (
         <EditProductModal
           product={editingProduct}
-          categories={categories}
+          categories={categoryOptions}
           onClose={() => setEditingProduct(null)}
         />
       )}

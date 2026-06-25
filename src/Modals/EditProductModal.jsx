@@ -3,6 +3,8 @@ import { X, Edit, Save, Upload } from 'lucide-react'
 import { useInventoryStore } from '../stores/useInventoryStore'
 
 const EditProductModal = ({ product, onClose, categories }) => {
+    //console.log(categories);
+    
     const [formData, setFormData] = useState({
         name: product.name || '',
         description: product.description || '',

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit, Star, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import EditProductModal from "../Modals/EditProductModal";
@@ -7,7 +7,7 @@ import { useCategoryStore } from "../stores/useCategoryStore";
 import EditOrderModal from "../Modals/EditOrderModal";
 
 const Orders = () => {
-  const { getAllOrders, orders, page, limit, total, loading } =
+  const { getAllOrders, orders, page, limit, total, loading, getExcelSheet } =
     useCategoryStore();
   //console.log(orders);
   const [searchOptions, setsearchOptions] = useState({
@@ -16,8 +16,16 @@ const Orders = () => {
     paymentMethod: "",
     paidFrom: "",
     paidUntil: "",
-    year: ""
-  })
+    year: "",
+  });
+  //console.log(orders);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getAllOrders(1, limit, searchOptions);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchOptions, page, limit]);
 
   const [editingOrder, setEditingOrder] = useState(null);
   const [deletingProduct, setDeletingProduct] = useState(null);
@@ -78,8 +86,8 @@ const Orders = () => {
 
     return rangeWithDots;
   };
-  console.log(searchOptions);
-  
+  //console.log(searchOptions);
+
   return (
     <motion.div
       className="bg-gray-800 shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto"
@@ -88,20 +96,22 @@ const Orders = () => {
       transition={{ duration: 0.8 }}
     >
       <div className="px-6 py-4 border-b border-gray-700 space-y-4">
-
-{/* top row */}
-<div className="flex flex-col lg:flex-row gap-3">
-
-    {/* Search */}
-    <div className="relative flex-1">
-
-        <input
-            type="text"
-            name= "orderNumber"
-            value= {searchOptions.orderNumber}
-            onChange = {(e)=> setsearchOptions((prev)=>({...prev,orderNumber:e.target.value}))}
-            placeholder="Search order number..."
-            className="
+        {/* top row */}
+        <div className="flex flex-col lg:flex-row gap-3">
+          {/* Search */}
+          <div className="relative flex-1">
+            <input
+              type="text"
+              name="orderNumber"
+              value={searchOptions.orderNumber}
+              onChange={(e) =>
+                setsearchOptions((prev) => ({
+                  ...prev,
+                  orderNumber: e.target.value,
+                }))
+              }
+              placeholder="Search order number..."
+              className="
                 w-full rounded-lg
                 bg-gray-700
                 border border-gray-600
@@ -113,59 +123,54 @@ const Orders = () => {
                 focus:ring-1
                 focus:ring-emerald-500
             "
-        />
+            />
 
-
-        <svg
-            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-        >
-            <path
+            <svg
+              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 6 6a7.5 7.5 0 0 0 10.65 10.65Z"
-            />
-        </svg>
+              />
+            </svg>
 
-       {searchOptions.orderNumber && 
-         <button
-         type="button"
-         onClick={() =>
-           setsearchOptions((prev) => ({
-             ...prev,
-             orderNumber: "",
-           }))
-         }
-         className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 hover:text-white transition-colors"
-         aria-label="Clear search"
-       >
-         <svg
-           fill="none"
-           stroke="currentColor"
-           viewBox="0 0 24 24"
-         >
-           <path
-             strokeLinecap="round"
-             strokeLinejoin="round"
-             strokeWidth={2}
-             d="M6 18L18 6M6 6l12 12"
-           />
-         </svg>
-       </button>
-       }
+            {searchOptions.orderNumber && (
+              <button
+                type="button"
+                onClick={() =>
+                  setsearchOptions((prev) => ({
+                    ...prev,
+                    orderNumber: "",
+                  }))
+                }
+                className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
 
-    </div>
-
-   
-    {/* Status */}
-    <select
-        name= "status"
-        value = {searchOptions.status}
-        onChange = {(e)=> setsearchOptions((prev)=>({...prev,status:e.target.value}))}
-        className="
+          {/* Status */}
+          <select
+            name="status"
+            value={searchOptions.status}
+            onChange={(e) =>
+              setsearchOptions((prev) => ({ ...prev, status: e.target.value }))
+            }
+            className="
             rounded-lg
             bg-gray-700
             border border-gray-600
@@ -174,38 +179,29 @@ const Orders = () => {
             focus:border-emerald-500
             focus:outline-none
         "
-    >
+          >
+            <option value="">All Status</option>
 
-        <option value="">
-            All Status
-        </option>
+            <option value="COMPLETED">COMPLETED</option>
 
-        <option value="COMPLETED">
-            COMPLETED
-        </option>
+            <option value="PENDING_PAYMENT">PENDING_PAYMENT</option>
 
-        <option value="PENDING_PAYMENT">
-            PENDING_PAYMENT
-        </option>
+            <option value="PAYMENT_FAILED">PAYMENT_FAILED</option>
 
-        <option value="PAYMENT_FAILED">
-            PAYMENT_FAILED
-        </option>
+            <option value="PROCESSING">PROCESSING</option>
+          </select>
 
-        <option value="PROCESSING">
-            PROCESSING
-        </option>
-
-    </select>
-
-
-    
-    {/* Payment */}
-    <select
-        name="paymentMethod"
-        value= {searchOptions.paymentMethod}
-        onChange = {(e)=> setsearchOptions((prev)=>({...prev, paymentMethod: e.target.value}))}
-        className="
+          {/* Payment */}
+          <select
+            name="paymentMethod"
+            value={searchOptions.paymentMethod}
+            onChange={(e) =>
+              setsearchOptions((prev) => ({
+                ...prev,
+                paymentMethod: e.target.value,
+              }))
+            }
+            className="
             rounded-lg
             bg-gray-700
             border border-gray-600
@@ -214,25 +210,17 @@ const Orders = () => {
             focus:border-emerald-500
             focus:outline-none
         "
-    >
+          >
+            <option value="">All Payments</option>
 
-        <option value="">
-            All Payments
-        </option>
+            <option value="MPESA">MPESA</option>
 
-        <option value="MPESA">
-            MPESA
-        </option>
+            <option value="CARD">CARD</option>
+          </select>
 
-        <option value="CARD">
-            CARD
-        </option>
-
-    </select>
-
-
-    <button
-        className="
+          <button
+          onClick={()=> getExcelSheet(searchOptions)}
+            className="
             rounded-lg
             bg-emerald-600
             px-5 py-2
@@ -241,42 +229,40 @@ const Orders = () => {
             text-white
             hover:bg-emerald-700
         "
-    >
-        Filter
-    </button>
+          >
+            Export Excel
+          </button>
+        </div>
 
-</div>
-
-
-
-{/* Advanced filters */}
-<div
-    className="
+        {/* Advanced filters */}
+        <div
+          className="
         bg-gray-750
         border
         border-gray-700
         rounded-lg
         p-4
     "
->
+        >
+          <h3 className="text-sm font-medium text-gray-300 mb-3">
+            Advanced Date Filters
+          </h3>
 
-    <h3 className="text-sm font-medium text-gray-300 mb-3">
-        Advanced Date Filters
-    </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* From */}
+            <div>
+              <label className="text-xs text-gray-400">Paid From</label>
 
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* From */}
-        <div>
-            <label className="text-xs text-gray-400">
-                Paid From
-            </label>
-
-            <input
+              <input
                 type="date"
                 name="paidFrom"
-                value= {searchOptions.paidFrom}
-                onChange = {(e)=> setsearchOptions((prev)=>({...prev, paidFrom: e.target.value}))}
+                value={searchOptions.paidFrom}
+                onChange={(e) =>
+                  setsearchOptions((prev) => ({
+                    ...prev,
+                    paidFrom: e.target.value,
+                  }))
+                }
                 className="
                     mt-1
                     w-full
@@ -287,25 +273,23 @@ const Orders = () => {
                     text-sm
                     text-white
                 "
-            />
+              />
+            </div>
 
-        </div>
+            {/* To */}
+            <div>
+              <label className="text-xs text-gray-400">Paid Until</label>
 
-
-
-        {/* To */}
-        <div>
-
-            <label className="text-xs text-gray-400">
-                Paid Until
-            </label>
-
-
-            <input
+              <input
                 type="date"
                 name="paidUntil"
-                value= {searchOptions.paidUntil}
-                onChange = {(e)=> setsearchOptions((prev)=>({...prev, paidUntil: e.target.value}))}
+                value={searchOptions.paidUntil}
+                onChange={(e) =>
+                  setsearchOptions((prev) => ({
+                    ...prev,
+                    paidUntil: e.target.value,
+                  }))
+                }
                 className="
                     mt-1
                     w-full
@@ -316,25 +300,22 @@ const Orders = () => {
                     text-sm
                     text-white
                 "
-            />
+              />
+            </div>
 
-        </div>
+            {/* Year */}
+            <div>
+              <label className="text-xs text-gray-400">Year</label>
 
-
-
-
-        {/* Year */}
-        <div>
-
-            <label className="text-xs text-gray-400">
-                Year
-            </label>
-
-
-            <select
-            name= "year"
-            value= {searchOptions.year}
-            onChange = {(e)=> setsearchOptions((prev)=>({...prev, year: e.target.value}))}
+              <select
+                name="year"
+                value={searchOptions.year}
+                onChange={(e) =>
+                  setsearchOptions((prev) => ({
+                    ...prev,
+                    year: e.target.value,
+                  }))
+                }
                 className="
                     mt-1
                     w-full
@@ -345,33 +326,17 @@ const Orders = () => {
                     text-sm
                     text-white
                 "
-            >
+              >
+                <option value="">All Years</option>
 
-                <option value="">
-                    All Years
-                </option>
+                <option value="2026">2026</option>
 
-                <option value="2026">
-                    2026
-                </option>
-
-                <option value="2025">
-                    2025
-                </option>
-
-            </select>
-
-
+                <option value="2025">2025</option>
+              </select>
+            </div>
+          </div>
         </div>
-
-
-    </div>
-
-
-</div>
-
-
-</div>
+      </div>
       <div className="overflow-x-auto rounded-lg border border-gray-700">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-700">
