@@ -19,6 +19,9 @@ import GuestRoute from "./layouts/GuestRoute"
 import AppLayout from "./layouts/AppLayout"
 import ProtectedRoute from "./Components/ProtectedRoute"
 import PurchaseSuccessPage from "./Pages/PurchaseSuccess"
+import ProfilePage from "./Pages/ProfilePage"
+import ChangePassword from "./Pages/ChangePassword"
+import VerifyEmail from "./Components/VerifyEmail"
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -27,7 +30,8 @@ function App() {
   useEffect(() => {
     // only run googleRedirect on non-reset routes
     const isResetRoute = window.location.pathname === '/reset'
-    if (!isResetRoute) {
+    const isVerifyRoute = window.location.pathname === '/verify'
+    if (!isResetRoute && !isVerifyRoute) {
       googleRedirect()
     }
     checkAuth()
@@ -60,6 +64,7 @@ function App() {
           {/* PUBLIC ROUTES*/}
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/reset' element={<PasswordReset />} />
+          <Route path='/verify' element={<VerifyEmail />} />
 
           {/* GUEST ROUTES*/}
           <Route element={<GuestRoute />}>
@@ -75,6 +80,8 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path='/cart' element={<CartPage />} />
             <Route path='/checkout/success' element={<PurchaseSuccessPage />} />
+            <Route path="/profile" element={<ProfilePage/>} />
+            <Route path="/change-password" element={<ChangePassword/>} />
           </Route>
 
           {/* ADMIN ROUTES*/}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, Loader, Lock, Mail, User, UserPlus } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Loader, Lock, Mail, User, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../stores/useUserStore'
 
@@ -14,6 +14,7 @@ const Signup = () => {
     password: "",
     confirmPassword: ""
   })
+  const [showPassword, setShowPassword] = useState(false);
   const { signup, loading } = useUserStore()
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -116,7 +117,7 @@ const Signup = () => {
                 </div>
                 <input
                   id='password'
-                  type='password'
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -124,6 +125,23 @@ const Signup = () => {
 									 placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm'
                   placeholder='****'
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="
+        absolute inset-y-0 right-0 
+        pr-3 
+        flex items-center
+        text-gray-400
+        hover:text-white
+      "
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
             <div>
@@ -136,7 +154,7 @@ const Signup = () => {
                 </div>
                 <input
                   id='confirmPassword'
-                  type='password'
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -144,6 +162,23 @@ const Signup = () => {
 									 placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm'
                   placeholder='*****'
                 />
+                 <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="
+        absolute inset-y-0 right-0 
+        pr-3 
+        flex items-center
+        text-gray-400
+        hover:text-white
+      "
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
