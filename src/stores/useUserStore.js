@@ -8,6 +8,7 @@ export const useUserStore = create((set, get) => ({
   loading: false,
   checkingAuth: true,
   passwordLoading: false,
+  userProfile: null,
 
   signup: async ({ lastName, firstName, email, password, confirmPassword }) => {
     set({ loading: false });
@@ -86,6 +87,9 @@ export const useUserStore = create((set, get) => ({
       if (res.data.errors) {
         set({ loading: false });
         toast.error(res.data.errors[0].message);
+        if(/email\s+not\s+verified/i.test(res.data.errors[0].message)){
+          return {status:"error", message: res.data.errors[0].message}
+        }        
         return;
       }
       const { accessToken, refreshToken } = res.data.data.login;
@@ -278,9 +282,7 @@ export const useUserStore = create((set, get) => ({
     }
     const query = `
             mutation ChangePassword ($passwordInput: changePasswordInput!) {
-                changePassword(passwordInput: $passwordInput){
-                
-                }
+                changePassword(passwordInput: $passwordInput)
             }
         `;
     const variables = {
@@ -289,7 +291,7 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await graphqlInstance.post("", { query, variables });
       if (res.data.errors) {
-        toast.error("Error changing password");
+        toast.error(res.data.errors[0].message);
         set({ passwordLoading: false });
         return;
       }
@@ -309,7 +311,50 @@ export const useUserStore = create((set, get) => ({
 
       return {success:true}
     } catch (error) {
-      toast.error(error.response?.data?.message || "Verification failed");
+      const message = error.response?.data?.message || "Verification failed"
+      toast.error(message,{id:'change-pass'});
+      return {success:false, message}
     }
   },
+
+  resendVerificationEmail: async (email) => {
+    try {
+      const body = {email}
+      const res = await restInstance.post(`/auth/resend`,body);
+      toast.success("A verification link has been sent to your email")
+      return {success:true}
+    } catch (error) {
+      const message = error.response?.data?.message || "Verification failed"
+      toast.error(message,{id:'resend'});
+      return {success:false, message}
+    }
+  },
+
+  getUserProfile: async () => {
+    const query = `
+      query GetUser {
+        getUser {
+          userId,
+          email,
+          role,
+          firstName,
+          lastName,
+          createdAt,
+          isVerified,
+          phoneNumber
+        }
+      } 
+    `
+    try {
+      const res = await graphqlInstance.post("",{query})
+      if (res.data.errors) {
+        throw new Error(res.data.errors[0].message);
+      }
+      //console.log(res.data);
+      set({userProfile: res.data.data.getUser})
+    } catch (error) {
+      set({userProfile: null})
+      console.error("Logout error:", error.message);
+    }
+  }
 }));

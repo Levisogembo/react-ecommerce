@@ -7,8 +7,9 @@ import { useCartStore } from '../stores/useCartStore'
 const Navbar = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const dropdownRef = useRef(null)
-    const { user, logout } = useUserStore()
+    const { user, logout, userProfile, getUserProfile } = useUserStore()
     const { cart } = useCartStore()
+//console.log(userProfile);
 
     // close dropdown when clicking outside
     useEffect(() => {
@@ -20,6 +21,10 @@ const Navbar = () => {
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
+
+    useEffect(()=>{
+        if(user) getUserProfile()
+    },[userProfile])
 
     const getInitials = (user) => {
         if (!user) return 'U'
@@ -73,10 +78,10 @@ const Navbar = () => {
                                 >
                                     {/* avatar initials */}
                                     <div className='w-7 h-7 rounded-full bg-emerald-800 flex items-center justify-center text-xs font-semibold text-emerald-300 flex-shrink-0'>
-                                        {getInitials(user)}
+                                        {getInitials(userProfile)}
                                     </div>
                                     <span className='hidden sm:inline text-sm text-gray-300'>
-                                        {user.firstName || user.email}
+                                        {userProfile.firstName || user.email}
                                     </span>
                                     <ChevronDown
                                         size={14}
@@ -91,13 +96,13 @@ const Navbar = () => {
                                         {/* user info */}
                                         <div className='px-4 py-3 border-b border-gray-700 flex items-center gap-3'>
                                             <div className='w-9 h-9 rounded-full bg-emerald-800 flex items-center justify-center text-sm font-semibold text-emerald-300 flex-shrink-0'>
-                                                {getInitials(user)}
+                                                {getInitials(userProfile)}
                                             </div>
                                             <div className='min-w-0'>
                                                 <p className='text-sm font-medium text-white truncate'>
-                                                    {user.firstName} {user.lastName}
+                                                    {userProfile.firstName} {userProfile.lastName}
                                                 </p>
-                                                <p className='text-xs text-gray-500 truncate'>{user.email}</p>
+                                                <p className='text-xs text-gray-500 truncate'>{userProfile.email}</p>
                                             </div>
                                         </div>
 

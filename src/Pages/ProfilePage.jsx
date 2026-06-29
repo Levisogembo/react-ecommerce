@@ -1,11 +1,23 @@
 import { motion } from "framer-motion";
-import { User, Mail, Calendar, Shield, KeyRound, LogOut } from "lucide-react";
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  KeyRound,
+  LogOut,
+  Phone,
+  Edit,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
+import { useState } from "react";
+import EditProfileModal from "../Modals/EditProfileModal";
 
 const ProfilePage = () => {
-  const { user, logout } = useUserStore();
-
+  const { userProfile, logout } = useUserStore();
+  const [editingProfile, setEditingProfile] = useState(null);
+  const user = userProfile;
   const getInitials = (user) => {
     const first = user?.firstName?.[0] || "";
     const last = user?.lastName?.[0] || "";
@@ -58,6 +70,7 @@ const ProfilePage = () => {
                 value: `${user.firstName} ${user.lastName}`,
               },
               { icon: Mail, label: "Email", value: user.email },
+              { icon: Phone, label: "Phone number", value: user.phoneNumber },
               {
                 icon: Calendar,
                 label: "Member since",
@@ -73,7 +86,15 @@ const ProfilePage = () => {
                   <Icon size={15} className="text-gray-500" />
                   <span className="text-sm text-gray-400">{label}</span>
                 </div>
-                <span className="text-sm text-white font-medium">{value}</span>
+                {value ? (
+                  <span className="text-sm text-white font-medium">
+                    {value}
+                  </span>
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">N/A</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -88,6 +109,13 @@ const ProfilePage = () => {
               Change password
             </Link>
             <button
+              onClick={() => setEditingProfile(userProfile)}
+              className="flex-1 flex items-center justify-center gap-2 bg-transparent border border-green-900 hover:bg-green-950 hover:bg-opacity-40 text-green-400 text-sm font-medium py-2.5 rounded-lg transition duration-200"
+            >
+              <Edit size={14} />
+              Edit Profile
+            </button>
+            <button
               onClick={() => logout(user)}
               className="flex-1 flex items-center justify-center gap-2 bg-transparent border border-red-900 hover:bg-red-950 hover:bg-opacity-40 text-red-400 text-sm font-medium py-2.5 rounded-lg transition duration-200"
             >
@@ -95,6 +123,12 @@ const ProfilePage = () => {
               Logout
             </button>
           </div>
+          {editingProfile && (
+            <EditProfileModal
+              profile={editingProfile}
+              onClose={() => setEditingProfile(null)}
+            />
+          )}
         </div>
       </motion.div>
     </div>

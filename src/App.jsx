@@ -22,10 +22,11 @@ import PurchaseSuccessPage from "./Pages/PurchaseSuccess"
 import ProfilePage from "./Pages/ProfilePage"
 import ChangePassword from "./Pages/ChangePassword"
 import VerifyEmail from "./Components/VerifyEmail"
+import ResendVerification from "./Pages/ResendVerification"
 
 function App() {
   // const [count, setCount] = useState(0)
-  const { checkAuth, googleRedirect, user, checkingAuth } = useUserStore()
+  const { checkAuth, googleRedirect, user, checkingAuth, getUserProfile } = useUserStore()
   const { getCartItems, getMyCoupon, getPublicCoupons } = useCartStore()
   useEffect(() => {
     // only run googleRedirect on non-reset routes
@@ -40,6 +41,7 @@ function App() {
   useEffect(() => {
 
     if (user) {
+      getUserProfile()
       getCartItems()
       getMyCoupon()
       getPublicCoupons()
@@ -65,6 +67,7 @@ function App() {
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/reset' element={<PasswordReset />} />
           <Route path='/verify' element={<VerifyEmail />} />
+          <Route path='/resend-verification' element={<ResendVerification />} />
 
           {/* GUEST ROUTES*/}
           <Route element={<GuestRoute />}>
