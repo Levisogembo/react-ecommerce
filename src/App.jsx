@@ -46,7 +46,7 @@ function App() {
       getMyCoupon()
       getPublicCoupons()
     }
-  }, [user,getPublicCoupons,getMyCoupon])
+  }, [user,getPublicCoupons,getMyCoupon,getUserProfile])
   if (checkingAuth) {
     return <LoadingSpinner />
   }

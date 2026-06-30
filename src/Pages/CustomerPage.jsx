@@ -1,13 +1,14 @@
-import { BarChart, Edit, Grid, ListOrdered, PlusCircle, ShoppingBag, ShoppingBasket, ShoppingCart, User } from 'lucide-react'
+import { BarChart, Edit, Grid, LayoutDashboard, ListOrdered, PlusCircle, ShoppingBag, ShoppingBasket, ShoppingCart, User } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInventoryStore } from '../stores/useInventoryStore'
 import EditProfile from '../Components/EditProfile'
 import ViewProfile from '../Components/ViewProfile'
 import MyOrders from '../Components/MyOrders'
+import OverviewDashboard from '../Components/Overview'
 
 const tabs = [
-    { id: "create", label: "Edit Profile", icon: Edit },
+    { id: "create", label: "Overview", icon: LayoutDashboard },
     { id: "profile", label: "View Profile", icon: User },
     { id: "orders", label: "My Orders", icon: ShoppingCart },
 ]
@@ -37,7 +38,7 @@ const CustomerPage = () => {
                         </button>
                     ))}
                 </div>
-                {activeTab === "create" && <EditProfile/>}
+                {activeTab === "create" && <OverviewDashboard/>}
                 {activeTab === "profile" && <ViewProfile/>}
                 {activeTab === "orders" && <MyOrders/>}
             </div>

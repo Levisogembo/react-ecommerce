@@ -87,9 +87,9 @@ export const useUserStore = create((set, get) => ({
       if (res.data.errors) {
         set({ loading: false });
         toast.error(res.data.errors[0].message);
-        if(/email\s+not\s+verified/i.test(res.data.errors[0].message)){
-          return {status:"error", message: res.data.errors[0].message}
-        }        
+        if (/email\s+not\s+verified/i.test(res.data.errors[0].message)) {
+          return { status: "error", message: res.data.errors[0].message };
+        }
         return;
       }
       const { accessToken, refreshToken } = res.data.data.login;
@@ -308,25 +308,24 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await restInstance.get(`/auth/verify?token=${token}`);
 
-
-      return {success:true}
+      return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || "Verification failed"
-      toast.error(message,{id:'change-pass'});
-      return {success:false, message}
+      const message = error.response?.data?.message || "Verification failed";
+      toast.error(message, { id: "change-pass" });
+      return { success: false, message };
     }
   },
 
   resendVerificationEmail: async (email) => {
     try {
-      const body = {email}
-      const res = await restInstance.post(`/auth/resend`,body);
-      toast.success("A verification link has been sent to your email")
-      return {success:true}
+      const body = { email };
+      const res = await restInstance.post(`/auth/resend`, body);
+      toast.success("A verification link has been sent to your email");
+      return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || "Verification failed"
-      toast.error(message,{id:'resend'});
-      return {success:false, message}
+      const message = error.response?.data?.message || "Verification failed";
+      toast.error(message, { id: "resend" });
+      return { success: false, message };
     }
   },
 
@@ -344,17 +343,56 @@ export const useUserStore = create((set, get) => ({
           phoneNumber
         }
       } 
-    `
+    `;
     try {
-      const res = await graphqlInstance.post("",{query})
+      const res = await graphqlInstance.post("", { query });
       if (res.data.errors) {
-        throw new Error(res.data.errors[0].message);
+        toast.error(res.data.errors[0].message);
+        return;
       }
-      //console.log(res.data);
-      set({userProfile: res.data.data.getUser})
+      set({ userProfile: res.data.data.getUser });
     } catch (error) {
-      set({userProfile: null})
-      console.error("Logout error:", error.message);
+      set({ userProfile: null });
+      toast.error("profile error:", error.message);
     }
-  }
+  },
+
+  editUserProfile: async (profilePayload) => {
+    const filteredObj = Object.fromEntries(
+      Object.entries(profilePayload).filter(
+        ([_, value]) => value !== undefined && value !== "",
+      ),
+    );
+
+    if (Object.keys(filteredObj).length === 0) {
+      toast.error("No changes detected to update");
+      return;
+    }
+    const query = `
+      mutation EditProfile ($profilePayload: editUserInput!) {
+          editProfile (profilePayload: $profilePayload) {
+            userId,
+            email,
+            role,
+            firstName,
+            lastName,
+            createdAt,
+            isVerified,
+            phoneNumber
+          }
+      }
+    `;
+    const variables = { profilePayload };
+    try {
+      const res = await graphqlInstance.post("", { query, variables });
+      if (res.data.errors) {
+        toast.error(res.data.errors[0].message);
+        return;
+      }
+      toast.success("Profile changed successfully");
+      set({ userProfile: res.data.data.editProfile });
+    } catch (error) {
+      toast.error("profile error:", error.message);
+    }
+  },
 }));

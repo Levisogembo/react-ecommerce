@@ -8,6 +8,7 @@ import {
   LogOut,
   Phone,
   Edit,
+  VerifiedIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
@@ -18,6 +19,7 @@ const ProfilePage = () => {
   const { userProfile, logout } = useUserStore();
   const [editingProfile, setEditingProfile] = useState(null);
   const user = userProfile;
+
   const getInitials = (user) => {
     const first = user?.firstName?.[0] || "";
     const last = user?.lastName?.[0] || "";
@@ -77,6 +79,11 @@ const ProfilePage = () => {
                 value: formatDate(user.createdAt),
               },
               { icon: Shield, label: "Role", value: user.role },
+              {
+                icon: VerifiedIcon,
+                label: "Verified",
+                value: user.isVerified,
+              },
             ].map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
@@ -94,6 +101,12 @@ const ProfilePage = () => {
                   <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
                     <span className="text-xs text-gray-400">N/A</span>
                   </div>
+                )}
+                {value && value === true && (
+                  <span className="text-xs text-green-400">
+                    {" "}
+                    <Icon size={15} className="text-green-500" />
+                  </span>
                 )}
               </div>
             ))}
