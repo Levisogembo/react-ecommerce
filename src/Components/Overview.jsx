@@ -3,19 +3,45 @@ import { useUserStore } from "../stores/useUserStore";
 import { motion } from "framer-motion";
 import { useCustomerStore } from "../stores/useCustomerStore";
 import { useEffect } from "react";
-import LoadingSpinner from "./loadingSpinner"
+import LoadingSpinner from "./loadingSpinner";
 
 const OverviewDashboard = () => {
   const { userProfile } = useUserStore();
-  const { getDashboardData, loading, totalOrders, completedOrders, totalRevenue, couponCount } = useCustomerStore();
+  const paidStatuses = ["COMPLETED", "SHIPPED", "DELIVERED"];
+  const {
+    getDashboardData,
+    loading,
+    totalOrders,
+    completedOrders,
+    totalRevenue,
+    couponCount,
+    orders,
+    coupons,
+  } = useCustomerStore();
 
   useEffect(() => {
     getDashboardData();
   }, [getDashboardData]);
+
+  const latestPurchases = orders
+    ?.filter((order) => order.status === "COMPLETED")
+    .flatMap((order) =>
+      order.orderItems.map((item) => ({
+        orderItemId: item.orderItemId,
+        productName: item.Product.name,
+        quantity: item.quantity,
+        createdAt: order.createdAt,
+        orderNumber: order.orderNumber,
+        total: order.total,
+      })),
+    )
+    .slice(0, 5);
+  console.log(coupons);
+
   return (
     <div>
       {loading ? (
-        <LoadingSpinner/>
+        <LoadingSpinner />
       ) : (
         <div className="space-y-6">
           {/* Header */}
@@ -102,40 +128,77 @@ const OverviewDashboard = () => {
             <div className="px-5 py-4 border-b border-gray-700">
               <h2 className="text-white font-semibold">Recent Orders</h2>
             </div>
+            {orders?.length > 0 ? (
+              orders.map((item) => {
+                return (
+                  <div className="divide-y divide-gray-700" key={item.orderId}>
+                    <div
+                      className="
+                flex
+                justify-between
+                px-5
+                py-4
+            "
+                    >
+                      <div>
+                        <p className="text-white">#{item.orderNumber}</p>
 
-            <div className="divide-y divide-gray-700">
-              <div
-                className="
-                  flex
-                  justify-between
-                  px-5
-                  py-4
-              "
-              >
-                <div>
-                  <p className="text-white">#ORD1023</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(item.createdAt).toLocaleDateString(
+                            "en-KE",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                        </p>
+                      </div>
 
-                  <p className="text-xs text-gray-400">30 Jun 2026</p>
-                </div>
+                      <div className="text-right">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                            item.status === "COMPLETED"
+                              ? "bg-emerald-900 text-emerald-300"
+                              : item.status === "PENDING_PAYMENT"
+                                ? "bg-yellow-900 text-yellow-300"
+                                : item.status === "PAYMENT_FAILED"
+                                  ? "bg-red-900 text-red-300"
+                                  : item.status === "PROCESSING"
+                                    ? "bg-blue-900 text-blue-300"
+                                    : item.status === "SHIPPED"
+                                      ? "bg-indigo-900 text-indigo-300"
+                                      : item.status === "DELIVERED"
+                                        ? "bg-purple-900 text-purple-300"
+                                        : "bg-gray-700 text-gray-300"
+                          }`}
+                        >
+                          {item.status.replace(/_/g, " ")}
+                        </span>
 
-                <div className="text-right">
-                  <span
-                    className="
-                          bg-emerald-900
-                          text-emerald-300
-                          px-2
-                          py-1
-                          rounded-full
-                          text-xs
-                      "
-                  >
-                    Completed
-                  </span>
-
-                  <p className="text-white mt-1">Ksh 3000</p>
-                </div>
-              </div>
-            </div>
+                        {paidStatuses.includes(item.status) ? (
+                          <p className="mt-2 text-sm font-semibold text-white">
+                            Ksh {item.total.toLocaleString()}
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-xs text-gray-500">
+                            {item.status === "PENDING_PAYMENT"
+                              ? "Awaiting payment"
+                              : item.status === "PROCESSING"
+                                ? "Payment confirmed"
+                                : item.status === "PAYMENT_FAILED"
+                                  ? "Payment unsuccessful"
+                                  : "No payment"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-center">No orders at the moment</p>
+            )}
           </div>
 
           {/* Bottom cards */}
@@ -152,28 +215,71 @@ const OverviewDashboard = () => {
 
             <div
               className="
-              bg-gray-800
-              border border-gray-700
-              rounded-xl
-              p-5
-          "
+    bg-gray-800
+    border border-gray-700
+    rounded-xl
+    p-5
+  "
             >
               <h2 className="text-white font-semibold mb-4">
-                Shopping Summary
+                Latest Purchases
               </h2>
 
               <div className="space-y-3">
-                <div
-                  className="
-                      flex
-                      justify-between
-                      text-sm
-                  "
-                >
-                  <span className="text-gray-300">Leather Jacket</span>
+                {latestPurchases?.length > 0 ? (
+                  latestPurchases.map((purchase) => (
+                    <div
+                      key={purchase.orderItemId}
+                      className="
+            flex
+            items-center
+            justify-between
+            border-b
+            border-gray-700
+            pb-3
+            last:border-0
+            last:pb-0
+          "
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-gray-200">
+                          {purchase.productName}
+                        </p>
 
-                  <span className="text-gray-400">x3</span>
-                </div>
+                        <p className="text-xs text-gray-500">
+                          {new Date(purchase.createdAt).toLocaleDateString(
+                            "en-KE",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                        </p>
+                      </div>
+
+                      <span
+                        className="
+              rounded-full
+              bg-emerald-900
+              px-2.5
+              py-1
+              text-xs
+              font-medium
+              text-emerald-300
+            "
+                      >
+                        ×{purchase.quantity}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-6 text-center">
+                    <p className="text-sm text-gray-400">
+                      No recent purchases at the moment.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
