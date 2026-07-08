@@ -13,17 +13,24 @@ const OverviewDashboard = () => {
     loading,
     totalOrders,
     completedOrders,
+    completed,
     totalRevenue,
     couponCount,
     orders,
     coupons,
+    getCoupons,
+    page,
+    limit,
+    getOrders
   } = useCustomerStore();
 
   useEffect(() => {
     getDashboardData();
+    getCoupons(page,limit)
+    getOrders(page,limit)
   }, [getDashboardData]);
 
-  const latestPurchases = orders
+  const latestPurchases = completed
     ?.filter((order) => order.status === "COMPLETED")
     .flatMap((order) =>
       order.orderItems.map((item) => ({
@@ -295,15 +302,30 @@ const OverviewDashboard = () => {
             >
               <h2 className="text-white font-semibold mb-4">Latest Coupon</h2>
 
-              <div>
-                <p className="text-emerald-400 text-lg font-bold">SAVE20</p>
+              {coupons ? (
+                <div>
+                  <p className="text-emerald-400 text-lg font-bold">{coupons[0]?.code}</p>
 
-                <p className="text-gray-300 mt-1">20% discount</p>
+                  <p className="text-gray-300 mt-1">{coupons[0]?.discountType === "percentage" ? `${coupons[0]?.discountValue}% discount` : `kes ${coupons[0]?.discountValue} discount`}</p>
 
-                <p className="text-xs text-gray-500 mt-2">
-                  Expires July 20, 2026
-                </p>
-              </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                  Expires {new Date(coupons[0]?.expirationDate).toLocaleDateString(
+                            "en-KE",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                  </p>
+                </div>
+              ) : (
+                <div className="py-6 text-center">
+                  <p className="text-sm text-gray-400">
+                    No coupons at the moment.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

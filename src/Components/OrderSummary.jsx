@@ -211,6 +211,7 @@ const OrderSummary = () => {
                             focus:border-emerald-500 focus:ring-emerald-500'
 							placeholder='07XX XXX XXX'
 							value={phone}
+							required
 							onChange={(e) => setPhone(e.target.value)}
 							maxLength={12}
 						/>
@@ -219,6 +220,7 @@ const OrderSummary = () => {
 							type="text"
 							placeholder="Enter shipping address"
 							value={query}
+							required
 							onChange={(e) => searchLocation(e.target.value)}
 							className="block w-full rounded-lg border border-gray-600
 				bg-gray-700 p-2.5 text-sm text-white placeholder-gray-400

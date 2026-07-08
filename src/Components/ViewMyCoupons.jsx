@@ -1,39 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit, Star, Trash, ChevronLeft, ChevronRight } from "lucide-react";
-import EditProductModal from "../Modals/EditProductModal";
-import DeleteProductModal from "../Modals/DeleteProductModal";
-import { useCategoryStore } from "../stores/useCategoryStore";
-import EditOrderModal from "../Modals/EditOrderModal";
 import { useCustomerStore } from "../stores/useCustomerStore";
 
-const MyOrders = () => {
-  const { getOrders, customerOrders, orderPage, orderLimit, customerOrdersCount, loading } =
-    useCustomerStore();
-    const total = customerOrdersCount
-    const page =  orderPage
-    const limit = orderLimit
-  //console.log(customerOrders);
-
+const ViewMyCoupons = () => {
+  const { getCoupons, page, limit, totalCoupons, total } = useCustomerStore();
   //console.log(orders);
-  const [editingOrder, setEditingOrder] = useState(null);
-  const [deletingProduct, setDeletingProduct] = useState(null);
 
   const totalPages = Math.ceil(total / limit);
   const handlePreviousPage = async () => {
     if (page > 1) {
-      await getOrders(page - 1, limit);
+      await getCoupons(page - 1, limit);
     }
   };
 
   const handleNextPage = async () => {
     if (page < totalPages) {
-      await getOrders(page + 1, limit);
+      await getCoupons(page + 1, limit);
     }
   };
 
   const handlePageClick = async (page) => {
-    await getOrders(page, limit);
+    await getCoupons(page, limit);
   };
 
   const getPaginationRange = (currentPage, totalPages) => {
@@ -89,101 +77,62 @@ const MyOrders = () => {
           <thead className="bg-gray-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Order Id
+                Coupon Code
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Created At
+                Discount Type
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Status
+                Discount Value
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Payment Method
+                Minimum Order Amount
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Paid At
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider whitespace-nowrap">
-                Actions
+                Expires On
               </th>
             </tr>
           </thead>
           <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {customerOrders?.length > 0 ? (
-              customerOrders?.map((order) => (
-                <tr key={order.orderId} className="hover:bg-gray-700">
+            {totalCoupons?.length > 0 ? (
+              totalCoupons?.map((coupon) => (
+                <tr key={coupon.couponId} className="hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-300 font-mono">
-                      {order.orderNumber
-                        ? order.orderNumber
-                        : `${order.orderId.substring(0, 8)}...`}
+                      {coupon.code}
                     </div>
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-300">
-                      {new Date(order.createdAt).toLocaleDateString("en-KE", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </div>
-                  </td>
-
-                  {/* status badge */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        order.status === "COMPLETED"
-                          ? "bg-emerald-900 text-emerald-300"
-                          : order.status === "PENDING_PAYMENT"
-                            ? "bg-yellow-900 text-yellow-300"
-                            : order.status === "PAYMENT_FAILED"
-                              ? "bg-red-900 text-red-300"
-                              : order.status === "PROCESSING"
-                                ? "bg-blue-900 text-blue-300"
-                                : "bg-gray-700 text-gray-300"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">
-                      {order.paymentMethod}
+                      {coupon.discountType}
                     </div>
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-300">
-                      {order.paidAt
-                        ? new Date(order.paidAt).toLocaleDateString("en-KE", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "—"}
+                      {coupon.discountType === "fixed"
+                        ? `Kes ${coupon.discountValue}`
+                        : `%${coupon.discountValue}`}
                     </div>
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-300">
-                      Ksh {order.total?.toLocaleString()}
+                      Kes {coupon.minOrderAmount?.toLocaleString()}
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-3">
-                      <button
-                        className="text-emerald-400 hover:text-emerald-300 text-xs"
-                        onClick={() => setEditingOrder(order)}
-                      >
-                        View
-                      </button>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-300">
+                      {new Date(coupon.expirationDate).toLocaleDateString(
+                        "en-KE",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -198,22 +147,6 @@ const MyOrders = () => {
           </tbody>
         </table>
       </div>
-      {editingOrder && (
-        <EditOrderModal
-          order={editingOrder}
-          onClose={() => setEditingOrder(null)}
-        />
-      )}
-      {deletingProduct && (
-        <DeleteProductModal
-          product={deletingProduct}
-          onClose={() => setDeletingProduct(null)}
-          onConfirm={() => {
-            deleteProduct(deletingProduct.productId);
-            setDeletingProduct(null);
-          }}
-        />
-      )}
       {/* pagination controls */}
       <div className="flex items-center justify-between px-6 py-4 border-t border-gray-700">
         {/* info */}
@@ -288,4 +221,4 @@ const MyOrders = () => {
   );
 };
 
-export default MyOrders;
+export default ViewMyCoupons;
