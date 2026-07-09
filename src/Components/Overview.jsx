@@ -43,7 +43,7 @@ const OverviewDashboard = () => {
       })),
     )
     .slice(0, 5);
-  console.log(coupons);
+  //console.log(coupons);
 
   return (
     <div>

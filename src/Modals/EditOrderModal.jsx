@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { X, Edit, Save, Upload } from "lucide-react";
+import { X, Edit, Save, Upload, Download } from "lucide-react";
 import { useInventoryStore } from "../stores/useInventoryStore";
+import { useUserStore } from "../stores/useUserStore";
 
 const EditOrderModal = ({ order, onClose }) => {
   const [formData, setFormData] = useState({
@@ -30,7 +31,8 @@ const EditOrderModal = ({ order, onClose }) => {
     { id: 9, key: "SHIPPED", value: "SHIPPED" },
     { id: 10, key: "DELIVERED", value: "DELIVERED" },
   ];
-  const { updateCategory } = useInventoryStore();
+  const { user } = useUserStore();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -142,8 +144,8 @@ const EditOrderModal = ({ order, onClose }) => {
         divide-y divide-gray-700
     "
                 >
-                  {order.payments.length > 0
-                    ? order.payments?.map((item) => (
+                  {order?.payments?.length > 0
+                    ? order?.payments?.map((item) => (
                         <div
                           key={item.paymentId}
                           className="
@@ -178,20 +180,30 @@ const EditOrderModal = ({ order, onClose }) => {
                 <label className="block text-xs text-gray-400 mb-1">
                   Order Status
                 </label>
-                <select
-                  name="order"
-                  value={formData.status}
-                  readOnly
-                  // onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-md py-2 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                >
-                  <option value="">Select status</option>
-                  {orderMap.map((status) => (
-                    <option key={status.id} value={status.value}>
-                      {status.key}
-                    </option>
-                  ))}
-                </select>
+                {user.role === "USER" ? (
+                  <input
+                    name="order"
+                    value={formData.status}
+                    readOnly
+                    //onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 rounded-md py-2 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                ) : (
+                  <select
+                    name="order"
+                    value={formData.status}
+                    readOnly
+                    // onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 rounded-md py-2 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  >
+                    <option value="">Select status</option>
+                    {orderMap.map((status) => (
+                      <option key={status.id} value={status.value}>
+                        {status.key}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-2">
@@ -228,7 +240,7 @@ const EditOrderModal = ({ order, onClose }) => {
                   </div>
 
                   {/* Items */}
-                  {order.orderItems?.map((item) => (
+                  {order?.orderItems?.map((item) => (
                     <div
                       key={item.orderItemId}
                       className="
@@ -273,19 +285,39 @@ const EditOrderModal = ({ order, onClose }) => {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={formData.isRefunded || formData.status !== "COMPLETED"}
-              className={`px-4 py-2 text-sm font-medium text-white rounded-md flex items-center gap-2
-    ${
-      formData.isRefunded || formData.status !== "COMPLETED"
-        ? "bg-gray-500 cursor-not-allowed opacity-50"
-        : "bg-emerald-600 hover:bg-emerald-700"
-    }`}
-            >
-              <Save className="h-4 w-4" />
-              Refund Order
-            </button>
+            {user.role === "USER" ? (
+              <button
+                type="submit"
+                disabled={
+                  formData.isRefunded || formData.status !== "COMPLETED"
+                }
+                className={`px-4 py-2 text-sm font-medium text-white rounded-md flex items-center gap-2
+                  ${
+                    formData.isRefunded || formData.status !== "COMPLETED"
+                      ? "bg-gray-500 cursor-not-allowed opacity-50"
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                  }`}
+              >
+                <Download className="h-4 w-4" />
+                Generate Receipt
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={
+                  formData.isRefunded || formData.status !== "COMPLETED"
+                }
+                className={`px-4 py-2 text-sm font-medium text-white rounded-md flex items-center gap-2
+${
+  formData.isRefunded || formData.status !== "COMPLETED"
+    ? "bg-gray-500 cursor-not-allowed opacity-50"
+    : "bg-emerald-600 hover:bg-emerald-700"
+}`}
+              >
+                <Save className="h-4 w-4" />
+                Refund Order
+              </button>
+            )}
           </div>
         </form>
       </div>
