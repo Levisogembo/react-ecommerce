@@ -10,7 +10,7 @@ export const useUserStore = create((set, get) => ({
   passwordLoading: false,
   userProfile: null,
 
-  signup: async ({ lastName, firstName, email, password, confirmPassword }) => {
+  signup: async ({ lastName, firstName, email, password, confirmPassword, phoneNumber }) => {
     set({ loading: false });
     if (password !== confirmPassword) {
       return toast.error("passwords do not match");
@@ -35,7 +35,7 @@ export const useUserStore = create((set, get) => ({
             }
         `;
     const variables = {
-      userInput: { firstName, lastName, email, password, confirmPassword },
+      userInput: { firstName, lastName, email, password, confirmPassword, phoneNumber },
     };
     try {
       const res = await graphqlInstance.post("", {

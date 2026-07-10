@@ -204,7 +204,11 @@ const OverviewDashboard = () => {
                 );
               })
             ) : (
-              <p className="text-center">No orders at the moment</p>
+              <div className="py-6 text-center">
+                    <p className="text-sm text-gray-400">
+                      No recent orders at the moment.
+                    </p>
+                  </div>
             )}
           </div>
 

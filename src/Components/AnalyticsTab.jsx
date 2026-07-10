@@ -1,9 +1,47 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { DollarSign, Package, ShoppingCart, Users } from 'lucide-react'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { restInstance } from '../lib/axios'
 import LoadingSpinner from './loadingSpinner'
+
+const normalizeDailySales = (rawData) => {
+  if (!Array.isArray(rawData)) return []
+
+  return rawData.map((item) => {
+    const parsedDate = new Date(item.name)
+    const isValidDate = !Number.isNaN(parsedDate.getTime())
+
+    return {
+      name: isValidDate
+        ? parsedDate.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' })
+        : String(item.name ?? ''),
+      sales: Number(item.sales) || 0,
+      revenue: Number(item.revenue) || 0,
+    }
+  })
+}
+
+const formatCurrency = (value) => `Kes ${Number(value).toLocaleString()}`
+
+const ChartTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null
+
+  return (
+    <div className="rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-sm shadow-lg">
+      <p className="mb-2 font-medium text-gray-200">{label}</p>
+      {payload.map((entry) => (
+        <p key={entry.dataKey} style={{ color: entry.color }} className="text-gray-300">
+          {entry.name}:{' '}
+          {entry.dataKey === 'revenue'
+            ? formatCurrency(entry.value)
+            : Number(entry.value).toLocaleString()}
+        </p>
+      ))}
+    </div>
+  )
+}
+
 const AnalyticsTab = () => {
   const [analyticsData, setAnalyticsData] = useState({
     users: 0,
@@ -26,7 +64,7 @@ const AnalyticsTab = () => {
           totalRevenue: data.totalRevenue
         })
         const response = await restInstance.get('/analytics/monthly')
-        setDailySales(response.data)        
+        setDailySales(normalizeDailySales(response.data))        
       } catch (error) {
         console.error("Error fetching analytics data:", error);
       } finally {
@@ -36,6 +74,21 @@ const AnalyticsTab = () => {
 
     fetchAnalytics()
   }, [])
+
+  const hasChartActivity = useMemo(
+    () => dailySales.some((day) => day.sales > 0 || day.revenue > 0),
+    [dailySales],
+  )
+
+  const maxSales = useMemo(
+    () => Math.max(...dailySales.map((day) => day.sales), 0),
+    [dailySales],
+  )
+
+  const maxRevenue = useMemo(
+    () => Math.max(...dailySales.map((day) => day.revenue), 0),
+    [dailySales],
+  )
 
   if (isLoading) return <LoadingSpinner/>
   return (
@@ -74,31 +127,62 @@ const AnalyticsTab = () => {
         transition={{ duration: 0.5, delay: 0.25 }}
       >
         <ResponsiveContainer width='100%' height={400}>
-          <LineChart data={dailySales}>
-            <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='name' stroke='#D1D5DB' />
-            <YAxis yAxisId='left' stroke='#D1D5DB' />
-            <YAxis yAxisId='right' orientation='right' stroke='#D1D5DB' />
-            <Tooltip />
+          <LineChart data={dailySales} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+            <CartesianGrid strokeDasharray='3 3' stroke='#374151' />
+            <XAxis
+              dataKey='name'
+              stroke='#D1D5DB'
+              tick={{ fontSize: 12 }}
+              minTickGap={24}
+              interval='preserveStartEnd'
+            />
+            <YAxis
+              yAxisId='left'
+              stroke='#10B981'
+              tick={{ fontSize: 12 }}
+              allowDecimals={false}
+              domain={[0, maxSales === 0 ? 1 : Math.ceil(maxSales * 1.2)]}
+              tickFormatter={(value) => Number(value).toLocaleString()}
+            />
+            <YAxis
+              yAxisId='right'
+              orientation='right'
+              stroke='#3B82F6'
+              tick={{ fontSize: 12 }}
+              domain={[0, maxRevenue === 0 ? 1 : Math.ceil(maxRevenue * 1.2)]}
+              tickFormatter={(value) => Number(value).toLocaleString()}
+            />
+            <Tooltip content={<ChartTooltip />} />
             <Legend />
             <Line
               yAxisId='left'
-              type='monotone'
+              type='linear'
               dataKey='sales'
               stroke='#10B981'
-              activeDot={{ r: 8 }}
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6 }}
               name='Sales'
+              connectNulls
             />
             <Line
               yAxisId='right'
-              type='monotone'
+              type='linear'
               dataKey='revenue'
               stroke='#3B82F6'
-              activeDot={{ r: 8 }}
+              strokeWidth={2}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6 }}
               name='Revenue'
+              connectNulls
             />
           </LineChart>
         </ResponsiveContainer>
+        {!hasChartActivity && (
+          <p className="mt-4 text-center text-sm text-gray-400">
+            No completed orders in the last 30 days. The chart only includes orders with status COMPLETED.
+          </p>
+        )}
       </motion.div>
     </div>
   )

@@ -18,7 +18,7 @@ export const useCustomerStore = create((set, get) => ({
   customerOrders: null,
   customerOrdersCount: 0,
   orderPage: 1,
-  orderLimit:10,
+  orderLimit: 10,
 
   getDashboardData: async () => {
     set({ loading: true });
@@ -66,9 +66,9 @@ export const useCustomerStore = create((set, get) => ({
         params: { page, limit },
       });
       const { coupons, total } = res.data;
-      set({loading: false, totalCoupons: coupons, total})
+      set({ loading: false, totalCoupons: coupons, total });
     } catch (error) {
-      set({loading: false, total: 0, page: 1, totalCoupons: null})
+      set({ loading: false, total: 0, page: 1, totalCoupons: null });
       const message = error.response?.data?.message || "Verification failed";
       toast.error(message);
     }
@@ -81,10 +81,37 @@ export const useCustomerStore = create((set, get) => ({
         params: { page, limit },
       });
       const { customerOrders, customerOrdersCount } = res.data;
-      set({loading: false, customerOrders, customerOrdersCount})
+      set({ loading: false, customerOrders, customerOrdersCount });
     } catch (error) {
-      set({loading: false, customerOrdersCount: 0, orderPage: 1, customerOrders: null})
+      set({
+        loading: false,
+        customerOrdersCount: 0,
+        orderPage: 1,
+        customerOrders: null,
+      });
       const message = error.response?.data?.message || "Verification failed";
+      toast.error(message);
+    }
+  },
+
+  generateReceipt: async (orderId) => {
+    try {
+      const res = await restInstance.get(`/orders/${orderId}/invoice`, {
+        responseType: "blob",
+      });
+      const blob = new Blob([res.data], {
+        type: 'application/pdf'
+      });
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `order-${orderId.slice(0,5)}-invoice.pdf`;
+      document.body.append(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      const message = error.response?.data?.message || "Could not generate receipt";
       toast.error(message);
     }
   },

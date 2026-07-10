@@ -20,12 +20,13 @@ const Orders = () => {
   });
   //console.log(orders);
 
+  // Reset to page 1 only when filters change (debounced search)
   useEffect(() => {
     const timer = setTimeout(() => {
       getAllOrders(1, limit, searchOptions);
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchOptions, page, limit]);
+  }, [searchOptions, limit]);
 
   const [editingOrder, setEditingOrder] = useState(null);
   const [deletingProduct, setDeletingProduct] = useState(null);
@@ -33,18 +34,18 @@ const Orders = () => {
   const totalPages = Math.ceil(total / limit);
   const handlePreviousPage = async () => {
     if (page > 1) {
-      await getAllOrders(page - 1, limit);
+      await getAllOrders(page - 1, limit, searchOptions);
     }
   };
 
   const handleNextPage = async () => {
     if (page < totalPages) {
-      await getAllOrders(page + 1, limit);
+      await getAllOrders(page + 1, limit, searchOptions);
     }
   };
 
-  const handlePageClick = async (page) => {
-    await getAllOrders(page, limit);
+  const handlePageClick = async (pageNumber) => {
+    await getAllOrders(pageNumber, limit, searchOptions);
   };
 
   const getPaginationRange = (currentPage, totalPages) => {

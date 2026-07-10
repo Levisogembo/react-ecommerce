@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Edit, Save, Upload, Download } from "lucide-react";
 import { useInventoryStore } from "../stores/useInventoryStore";
 import { useUserStore } from "../stores/useUserStore";
+import { useCustomerStore } from "../stores/useCustomerStore";
 
 const EditOrderModal = ({ order, onClose }) => {
   const [formData, setFormData] = useState({
@@ -31,6 +32,7 @@ const EditOrderModal = ({ order, onClose }) => {
     { id: 9, key: "SHIPPED", value: "SHIPPED" },
     { id: 10, key: "DELIVERED", value: "DELIVERED" },
   ];
+  const {generateReceipt} = useCustomerStore()
   const { user } = useUserStore();
 
   const handleChange = (e) => {
@@ -40,6 +42,7 @@ const EditOrderModal = ({ order, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    generateReceipt(order.orderId)
     console.log("clicked");
     onClose();
   };

@@ -89,7 +89,7 @@ const ProductList = () => {
       fetchAllProducts(1, limit, searchOptions);
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchOptions, page, limit]);
+  }, [searchOptions,limit]);
   //console.log(categoryOptions);
 
   return (

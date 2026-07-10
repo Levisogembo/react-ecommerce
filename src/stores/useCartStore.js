@@ -8,7 +8,7 @@ export const useCartStore = create((set, get) => ({
     coupon: null,
     loading: false,
     subTotal: 0,
-    coupon: null,
+    //coupon: null,
     personalCoupon: null,
     publicCoupons: [],
     allCoupons: [],
@@ -218,6 +218,7 @@ export const useCartStore = create((set, get) => ({
                             ? discountValue
                             : 0,
                 },
+                discountAmount,
                 isCouponApplied: true,
                 validating: false
             })
