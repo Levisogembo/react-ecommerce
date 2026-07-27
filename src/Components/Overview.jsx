@@ -23,7 +23,8 @@ const OverviewDashboard = () => {
     limit,
     getOrders
   } = useCustomerStore();
-
+  //console.log(coupons);
+  
   useEffect(() => {
     getDashboardData();
     getCoupons(page,limit)
@@ -306,7 +307,7 @@ const OverviewDashboard = () => {
             >
               <h2 className="text-white font-semibold mb-4">Latest Coupon</h2>
 
-              {coupons ? (
+              {coupons.length > 0 ? (
                 <div>
                   <p className="text-emerald-400 text-lg font-bold">{coupons[0]?.code}</p>
 

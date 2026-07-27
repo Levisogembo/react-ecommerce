@@ -91,6 +91,7 @@ const ProductList = () => {
     return () => clearTimeout(timer);
   }, [searchOptions,limit]);
   //console.log(categoryOptions);
+  const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
   return (
     <motion.div
@@ -255,7 +256,8 @@ const ProductList = () => {
                         {product.images?.length > 0 ? (
                           <img
                             className="h-10 w-10 rounded-full object-cover"
-                            src={`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`}
+                            src={`${BASE_URL}/images/${product.images[0].fileName}`}
+                            //src={`/images/${product.images[0].fileName}`}
                             alt={product.name}
                           />
                         ) : (

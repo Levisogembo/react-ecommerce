@@ -8,6 +8,7 @@ export const useInventoryStore = create((set, get) => ({
     categoryOptions: [],
     loading: false,
     categoryLoading: false,
+    createCategoryLoading: false,
     products: [],
     page: 1,
     categoryPage: 1,
@@ -17,7 +18,7 @@ export const useInventoryStore = create((set, get) => ({
     categoryTotal: 0,
 
     fetchCategories: async (categoryPage, categoryLimit) => {
-        set({ categoryLoading: true, categoryPage })
+        set({ createCategoryLoading: true, categoryPage })
 
         const query = `
             query GetAllCategories ($page: Float!, $limit: Float!) {
@@ -41,9 +42,9 @@ export const useInventoryStore = create((set, get) => ({
             const { category, total } = res.data.data.getAllCategories
             //console.log(category);
 
-            set({ categories: category, categoryTotal: total, categoryLoading: false })
+            set({ categories: category, categoryTotal: total, createCategoryLoading: false })
         } catch (error) {
-            set({ categoryLoading: false })
+            set({ createCategoryLoading: false })
             const message = error.errors?.[0]?.message || "Error in fetching categories ";
             toast.error(message)
         }

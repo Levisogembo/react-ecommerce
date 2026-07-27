@@ -4,7 +4,7 @@ import { Edit, Star, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCustomerStore } from "../stores/useCustomerStore";
 
 const ViewMyCoupons = () => {
-  const { getCoupons, page, limit, totalCoupons, total } = useCustomerStore();
+  const { getCoupons, page, limit, totalCoupons, total, loading } = useCustomerStore();
   //console.log(orders);
 
   const totalPages = Math.ceil(total / limit);
@@ -140,7 +140,7 @@ const ViewMyCoupons = () => {
             ) : (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center">
-                  <div className="text-gray-400 text-sm">No orders found</div>
+                  <div className="text-gray-400 text-sm">No coupons found</div>
                 </td>
               </tr>
             )}

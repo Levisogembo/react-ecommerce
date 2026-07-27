@@ -51,7 +51,8 @@ const FeaturedProducts = ({ featuredProducts }) => {
                                     <div className='bg-white bg-opacity-10 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30'>
                                         <div className='overflow-hidden'>
                                             <img
-                                                src={`${import.meta.env.VITE_API_BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                                                // src={`${import.meta.env.VITE_API_BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                                                src={`/images/${encodeURIComponent(product.images[0].fileName)}`}
                                                 alt={product.name}
                                                 className='w-full h-48 object-cover transition-transform duration-300 ease-in-out hover:scale-110'
                                             />

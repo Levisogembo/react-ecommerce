@@ -19,13 +19,16 @@ const ProductCard = ({ product }) => {
         }
         
     }
+    const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+
     return (
         <div className='flex w-full relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg'>
             <div className='relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl'>
                 {product.images?.length > 0 ? (
                     <img
                         className='object-cover w-full h-full'
-                        src={`${import.meta.env.VITE_API_BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                         src={`${BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                        //src={`/images/${encodeURIComponent(product.images[0].fileName)}`}
                         alt={product.name}
                     />
                 ) : (
