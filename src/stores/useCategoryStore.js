@@ -6,13 +6,14 @@ export const useCategoryStore = create((set, get) => ({
   categoryProducts: [],
   loading: false,
   featuredProducts: [],
+  categoryLoading: false,
   page: 1,
   limit: 10,
   orders: [],
   total: 0,
 
   getProductsByCategory: async (categoryName) => {
-    set({ loading: false });
+    set({ categoryLoading: true });
     try {
       const res = await restInstance.get(`/product/category/${categoryName}`);
       if (res.data.errors) {
@@ -20,9 +21,9 @@ export const useCategoryStore = create((set, get) => ({
         return;
       }
       const products = res.data.total > 0 ? res.data.products : [];
-      set({ categoryProducts: products, loading: false });
+      set({ categoryProducts: products, categoryLoading: false });
     } catch (error) {
-      set({ loading: false });
+      set({ categoryLoading: false });
       const message = error.message || "Error creating product";
       toast.error("No product found for this category");
     }
