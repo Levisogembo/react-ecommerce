@@ -136,7 +136,7 @@ const OverviewDashboard = () => {
             <div className="px-5 py-4 border-b border-gray-700">
               <h2 className="text-white font-semibold">Recent Orders</h2>
             </div>
-            {orders?.length > 0 ? (
+            {orders && orders?.length > 0 ? (
               orders.map((item) => {
                 return (
                   <div className="divide-y divide-gray-700" key={item.orderId}>
@@ -238,7 +238,7 @@ const OverviewDashboard = () => {
               </h2>
 
               <div className="space-y-3">
-                {latestPurchases?.length > 0 ? (
+                {latestPurchases && latestPurchases?.length > 0 ? (
                   latestPurchases.map((purchase) => (
                     <div
                       key={purchase.orderItemId}
@@ -307,7 +307,7 @@ const OverviewDashboard = () => {
             >
               <h2 className="text-white font-semibold mb-4">Latest Coupon</h2>
 
-              {coupons.length > 0 ? (
+              {coupons && coupons.length > 0 ? (
                 <div>
                   <p className="text-emerald-400 text-lg font-bold">{coupons[0]?.code}</p>
 
