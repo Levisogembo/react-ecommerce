@@ -35,7 +35,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
 
     const isStartDisabled = currentIndex === 0;
     const isEndDisabled = currentIndex >= featuredProducts.length - itemsPerPage;
-
+    const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
     return (
         <div className='py-12'>
             <div className='container mx-auto px-4'>
@@ -52,7 +52,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
                                         <div className='overflow-hidden'>
                                             <img
                                                 // src={`${import.meta.env.VITE_API_BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
-                                                src={`/images/${encodeURIComponent(product.images[0].fileName)}`}
+                                                src={`${BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
                                                 alt={product.name}
                                                 className='w-full h-48 object-cover transition-transform duration-300 ease-in-out hover:scale-110'
                                             />
