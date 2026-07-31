@@ -256,7 +256,8 @@ const ProductList = () => {
                         {product.images?.length > 0 ? (
                           <img
                             className="h-10 w-10 rounded-full object-cover"
-                            src={`${BASE_URL}/images/${product.images[0].fileName}`}
+                            //src={`${BASE_URL}/images/${product.images[0].fileName}`}
+                            src={product.images?.[0]?.filepath}
                             //src={`/images/${product.images[0].fileName}`}
                             alt={product.name}
                           />

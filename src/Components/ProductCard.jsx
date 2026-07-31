@@ -27,7 +27,8 @@ const ProductCard = ({ product }) => {
                 {product.images?.length > 0 ? (
                     <img
                         className='object-cover w-full h-full'
-                         src={`${BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                        //  src={`${BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                        src={product.images?.[0]?.filepath}
                         //src={`/images/${encodeURIComponent(product.images[0].fileName)}`}
                         alt={product.name}
                     />

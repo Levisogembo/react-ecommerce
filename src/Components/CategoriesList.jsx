@@ -112,7 +112,7 @@ const CategoriesList = () => {
           </tr>
         </thead>
         <tbody className="bg-gray-800 divide-y divide-gray-700">
-          {categories.length > 0 ? (
+          {categories && categories.length > 0 ? (
             categories?.map((category) => (
               <tr key={category.categoryId} className="hover:bg-gray-700">
                 <td className="px-6 py-4 whitespace-nowrap">

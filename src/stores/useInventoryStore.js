@@ -74,7 +74,6 @@ export const useInventoryStore = create((set, get) => ({
         }
     },
 
-
     createProduct: async (newProduct) => {
         set({ loading: true })
 

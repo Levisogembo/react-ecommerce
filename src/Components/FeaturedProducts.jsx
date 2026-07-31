@@ -52,7 +52,8 @@ const FeaturedProducts = ({ featuredProducts }) => {
                                         <div className='overflow-hidden'>
                                             <img
                                                 // src={`${import.meta.env.VITE_API_BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
-                                                src={`${BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                                                //src={`${BASE_URL}/images/${encodeURIComponent(product.images[0].fileName)}`}
+                                                src={product.images?.[0]?.filepath}
                                                 alt={product.name}
                                                 className='w-full h-48 object-cover transition-transform duration-300 ease-in-out hover:scale-110'
                                             />
