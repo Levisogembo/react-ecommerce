@@ -12,7 +12,7 @@ const CartItem = ({ item }) => {
 				<div className='shrink-0 md:order-1'>
 					<img className='h-20 md:h-32 rounded object-cover'
 					  //src={`${BASE_URL}/images/${item.fileName}`}
-					  src={images?.[0]?.item?.filepath}
+					  src={item?.filepath}
 					//src={`/images/${item.fileName}`} 
 					/>
 				</div>

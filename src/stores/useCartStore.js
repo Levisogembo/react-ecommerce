@@ -46,7 +46,8 @@ export const useCartStore = create((set, get) => ({
 
     addToCart: async ({ productId, description, name, price, images }) => {
         const fileName = images[0].fileName
-        const productCart = { productId, description, name, unitPrice: price, fileName };
+        const filepath = images[0].filepath
+        const productCart = { productId, description, name, unitPrice: price, fileName, filepath };
         //console.log(productCart);, 
         try {
             const res = await restInstance.post('/cart', productCart)
