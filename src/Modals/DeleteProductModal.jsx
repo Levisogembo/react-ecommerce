@@ -42,7 +42,7 @@ const DeleteProductModal = ({ product, onClose, onConfirm }) => {
                         </div>
                         <div className='text-left'>
                             <p className='text-xs font-medium text-emerald-100'>{product.name}</p>
-                            <p className='text-xs text-gray-500'>{product.brand} · ${product.price}</p>
+                            <p className='text-xs text-gray-500'>{product.brand} · Kes {product.price}</p>
                         </div>
                     </div>
                 </div>
