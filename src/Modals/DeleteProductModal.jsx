@@ -31,7 +31,8 @@ const DeleteProductModal = ({ product, onClose, onConfirm }) => {
                         <div className='w-9 h-9 rounded-md bg-emerald-900 flex items-center justify-center flex-shrink-0'>
                             {product.images?.length > 0 ? (
                                 <img
-                                    src={`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`}
+                                    //src={`${import.meta.env.VITE_API_BASE_URL}/images/${product.images[0].fileName}`}
+                                    src={product.images[0].filepath}
                                     className='w-9 h-9 rounded-md object-cover'
                                     alt={product.name}
                                 />
