@@ -284,7 +284,7 @@ export const useCartStore = create((set, get) => ({
             }
         `
         const items = cart.map((item) => {
-            const { name, fileName, description, ...data } = item
+            const { name, filepath, fileName, description, ...data } = item
             return data
         })
 
