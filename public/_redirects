@@ -1,4 +1,5 @@
-/ecommerce/*  http://57.129.152.91/ecommerce/:splat  200
+/ecommerce/graphql/* http://57.129.152.91/ecommerce/graphql/:splat 200
+/ecommerce/api/*     http://57.129.152.91/ecommerce/api/:splat     200
 /ecommerce/images/*  http://57.129.152.91/ecommerce/images/:splat  200
 
 /*    /index.html   200
