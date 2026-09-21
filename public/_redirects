@@ -1,2 +1,3 @@
 /*    /index.html   200
 /ecommerce/*  http://57.129.152.91/ecommerce/:splat  200
+/ecommerce/images/*  http://57.129.152.91/ecommerce/images/:splat  200
